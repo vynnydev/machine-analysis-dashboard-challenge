@@ -6,7 +6,6 @@ import {
   Plus,
   RefreshCw,
   ChevronUp,
-  ChevronDown,
   X,
   Box,
   Layers,
@@ -82,7 +81,6 @@ export default function WorkspacePage() {
   const toggleLeftPanel = () => {
     setLeftPanelState((prev) => {
       if (prev === "minimized") return "semi"
-      if (prev === "semi") return "expanded"
       return "minimized"
     })
   }
@@ -90,7 +88,6 @@ export default function WorkspacePage() {
   const toggleRightPanel = () => {
     setRightPanelState((prev) => {
       if (prev === "minimized") return "semi"
-      if (prev === "semi") return "expanded"
       return "minimized"
     })
   }
@@ -163,89 +160,72 @@ export default function WorkspacePage() {
         {/* Left Panel */}
         <Card
           className={`absolute left-24 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 rounded-2xl ${
-            leftPanelState === "minimized"
-              ? "w-16 h-16"
-              : leftPanelState === "semi"
-                ? "w-80 h-40"
-                : "w-80 h-auto max-h-[600px] overflow-y-auto"
+            leftPanelState === "minimized" ? "w-16 h-16" : "w-72"
           }`}
         >
-          <div className="p-4">
+          <div className="p-5">
             {leftPanelState === "minimized" ? (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleLeftPanel}
-                className="flex items-center justify-center w-full h-full hover:bg-transparent"
+                className="flex items-center justify-center w-full h-full hover:bg-emerald-500/10"
               >
-                <Activity className="h-6 w-6 text-cyan-500" />
+                <Activity className="h-6 w-6 text-emerald-500" />
               </Button>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-foreground">Total de Equipamentos</h3>
-                  <Button variant="ghost" size="icon" onClick={toggleLeftPanel} className="h-6 w-6">
-                    {leftPanelState === "semi" ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronUp className="h-4 w-4" />
-                    )}
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                      <Activity className="h-5 w-5 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total de Equipamentos</p>
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-3xl font-bold text-foreground">{totalMachines}</p>
+                        <p className="text-sm text-muted-foreground">Equipamentos</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={toggleLeftPanel} className="h-8 w-8 flex-shrink-0">
+                    <ChevronUp className="h-4 w-4" />
                   </Button>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                      <Activity className="h-5 w-5 text-cyan-500" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-foreground">{totalMachines}</p>
-                      <p className="text-xs text-muted-foreground">Equipamentos</p>
+                    <Settings className="h-5 w-5 text-emerald-500" />
+                    <div className="flex-1 flex items-center justify-between">
+                      <p className="text-sm text-foreground">Operando</p>
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-2xl font-bold text-foreground">{operatingMachines}</p>
+                        <p className="text-xs text-muted-foreground">Equipamentos</p>
+                      </div>
                     </div>
                   </div>
 
-                  {leftPanelState === "expanded" && (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                          <Settings className="h-5 w-5 text-green-500" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Operando</p>
-                            <p className="text-xl font-bold text-foreground">{operatingMachines}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">Equipamentos</p>
-                        </div>
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-amber-500" />
+                    <div className="flex-1 flex items-center justify-between">
+                      <p className="text-sm text-foreground">Em Manutenção</p>
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-2xl font-bold text-foreground">{maintenanceMachines}</p>
+                        <p className="text-xs text-muted-foreground">Equipamentos</p>
                       </div>
+                    </div>
+                  </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                          <AlertCircle className="h-5 w-5 text-amber-500" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Em Manutenção</p>
-                            <p className="text-xl font-bold text-foreground">{maintenanceMachines}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">Equipamentos</p>
-                        </div>
+                  <div className="flex items-center gap-3">
+                    <Wrench className="h-5 w-5 text-amber-500" />
+                    <div className="flex-1 flex items-center justify-between">
+                      <p className="text-sm text-foreground">Aguardando Manutenção</p>
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-2xl font-bold text-foreground">{waitingMachines}</p>
+                        <p className="text-xs text-muted-foreground">Equipamentos</p>
                       </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                          <Wrench className="h-5 w-5 text-amber-500" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Aguardando Manutenção</p>
-                            <p className="text-xl font-bold text-foreground">{waitingMachines}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">Equipamentos</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                    </div>
+                  </div>
                 </div>
               </>
             )}
@@ -351,89 +331,112 @@ export default function WorkspacePage() {
         {/* Right Panel */}
         <Card
           className={`absolute right-6 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 rounded-2xl ${
-            rightPanelState === "minimized"
-              ? "w-16 h-16"
-              : rightPanelState === "semi"
-                ? "w-80 h-64"
-                : "w-96 h-auto max-h-[600px] overflow-y-auto"
+            rightPanelState === "minimized" ? "w-16 h-16" : "w-96"
           }`}
         >
-          <div className="p-4">
+          <div className="p-5">
             {rightPanelState === "minimized" ? (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleRightPanel}
-                className="flex items-center justify-center w-full h-full hover:bg-transparent"
+                className="flex items-center justify-center w-full h-full hover:bg-emerald-500/10"
               >
-                <BarChart3 className="h-6 w-6 text-cyan-500" />
+                <BarChart3 className="h-6 w-6 text-emerald-500" />
               </Button>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-foreground">Métricas de Equipamentos</h3>
-                  <Button variant="ghost" size="icon" onClick={toggleRightPanel} className="h-6 w-6">
-                    {rightPanelState === "semi" ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Métricas de Equipamentos</h3>
+                    <p className="text-xs text-muted-foreground">Indicadores médios de desempenho</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-emerald-500">↗ 86.8%</span>
+                    <Button variant="ghost" size="icon" onClick={toggleRightPanel} className="h-8 w-8">
                       <ChevronUp className="h-4 w-4" />
-                    )}
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                      <Activity className="h-5 w-5 text-cyan-500" />
-                    </div>
+                <div className="mb-6">
+                  <div className="flex items-end justify-between h-32 gap-2">
+                    {[
+                      { label: "Eficiência", value: 86.8, color: "bg-gradient-to-t from-emerald-400 to-emerald-500" },
+                      {
+                        label: "Desempenho",
+                        value: 94.3,
+                        color: "bg-gradient-to-t from-emerald-400 to-emerald-500",
+                      },
+                      {
+                        label: "Disponibilidade",
+                        value: 92.0,
+                        color: "bg-gradient-to-t from-emerald-400 to-emerald-500",
+                      },
+                    ].map((metric, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                        <div className={`w-full rounded-t-md ${metric.color}`} style={{ height: `${metric.value}%` }} />
+                        <p className="text-[10px] text-muted-foreground text-center">{metric.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
                     <div>
-                      <p className="text-2xl font-bold text-foreground">{totalMachines}</p>
-                      <p className="text-xs text-muted-foreground">Equipamentos</p>
+                      <p className="text-xs text-muted-foreground">Efic.</p>
+                      <p className="text-lg font-bold text-foreground">86.8%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-amber-500" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Desemp.</p>
+                      <p className="text-lg font-bold text-foreground">94.3%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-red-500" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Qualid.</p>
+                      <p className="text-lg font-bold text-foreground">98.3%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-blue-500" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Dispon.</p>
+                      <p className="text-lg font-bold text-foreground">92.0%</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground">Eficiência ao Longo do Tempo</h4>
+                      <p className="text-xs text-muted-foreground">Últimas 6 horas de desempenho</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-2xl font-bold text-emerald-500">90.8%</p>
+                      <span className="text-xs text-emerald-500">↗ 0.5%</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <ChevronUp className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
 
-                  {rightPanelState === "expanded" && (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                          <Settings className="h-5 w-5 text-green-500" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Operando</p>
-                            <p className="text-xl font-bold text-foreground">{operatingMachines}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">Equipamentos</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                          <AlertCircle className="h-5 w-5 text-amber-500" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Em Manutenção</p>
-                            <p className="text-xl font-bold text-foreground">{maintenanceMachines}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">Equipamentos</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                          <Wrench className="h-5 w-5 text-amber-500" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Aguardando Manutenção</p>
-                            <p className="text-xl font-bold text-foreground">{waitingMachines}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">Equipamentos</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                  <div className="flex items-end justify-between h-24 gap-1">
+                    {[88, 86, 90, 89, 91, 90, 92, 91].map((value, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 bg-gradient-to-t from-cyan-400 to-blue-500 rounded-t-sm"
+                        style={{ height: `${value}%` }}
+                      />
+                    ))}
+                  </div>
                 </div>
               </>
             )}

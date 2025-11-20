@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -12,8 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MoreVertical, Plus, MessageSquare, Paperclip, Filter, ArrowUpDown, Users, Clock, Calendar, Tag, Star, FileText, AlertCircle, Search, ChevronDown } from 'lucide-react'
+import { MoreVertical, Plus, MessageSquare, Paperclip, Filter, ArrowUpDown, Users, Clock, Calendar, Tag, Star, FileText, AlertCircle, Search, ChevronDown, User, TrendingUp, X } from 'lucide-react'
 import { cn } from "@/lib/utils"
+import { NewTaskModal } from "@/components/new-task-modal"
 
 interface Task {
   id: string
@@ -63,6 +64,50 @@ const teamMembers = [
 export function KanbanBoard() {
   const [selectedProject, setSelectedProject] = useState(availableProjects[0])
   const [showProjectList, setShowProjectList] = useState(false)
+  const [newTaskModalOpen, setNewTaskModalOpen] = useState(false)
+  
+  const [selectedPeriod, setSelectedPeriod] = useState<"30days" | "3months" | "6months">("30days")
+  const [selectedPriority, setSelectedPriority] = useState<string>("all")
+  const [selectedStage, setSelectedStage] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  
+  const [selectedMetric, setSelectedMetric] = useState<string | null>(null)
+
+  const metrics = useMemo(() => {
+    const baseMetrics = {
+      "30days": {
+        members: 24,
+        membersDelta: "+2 desde último mês",
+        projects: 12,
+        projectsDelta: "+10.4% 9 projetos no último mês",
+        hours: 1248,
+        hoursDelta: "+15% vs período anterior",
+        completion: 87,
+        completionDelta: "+3% vs período anterior"
+      },
+      "3months": {
+        members: 28,
+        membersDelta: "+6 desde 3 meses atrás",
+        projects: 35,
+        projectsDelta: "+18.2% 30 projetos nos últimos 3 meses",
+        hours: 3840,
+        hoursDelta: "+22% vs trimestre anterior",
+        completion: 84,
+        completionDelta: "+5% trimestre anterior"
+      },
+      "6months": {
+        members: 32,
+        membersDelta: "+8 desde 6 meses atrás",
+        projects: 68,
+        projectsDelta: "+25.4% 54 projetos nos últimos 6 meses",
+        hours: 7520,
+        hoursDelta: "+28% vs semestre anterior",
+        completion: 82,
+        completionDelta: "+7% vs semestre anterior"
+      }
+    }
+    return baseMetrics[selectedPeriod]
+  }, [selectedPeriod])
 
   const [columns, setColumns] = useState<Column[]>([
     {
@@ -219,6 +264,38 @@ export function KanbanBoard() {
     },
   ])
 
+  const filteredColumns = useMemo(() => {
+    return columns.map(column => ({
+      ...column,
+      tasks: column.tasks.filter(task => {
+        // Filter by priority
+        if (selectedPriority !== "all" && task.priority !== selectedPriority) {
+          return false
+        }
+        
+        // Filter by stage (column)
+        if (selectedStage !== "all" && column.id !== selectedStage) {
+          return false
+        }
+        
+        // Filter by search query
+        if (searchQuery.trim() !== "") {
+          const query = searchQuery.toLowerCase()
+          const matchesTitle = task.title.toLowerCase().includes(query)
+          const matchesDescription = task.description?.toLowerCase().includes(query)
+          const matchesTags = task.tags.some(tag => tag.toLowerCase().includes(query))
+          const matchesMachine = task.machine?.toLowerCase().includes(query)
+          
+          if (!matchesTitle && !matchesDescription && !matchesTags && !matchesMachine) {
+            return false
+          }
+        }
+        
+        return true
+      })
+    }))
+  }, [columns, selectedPriority, selectedStage, searchQuery])
+
   const [draggedTask, setDraggedTask] = useState<{ task: Task; columnId: string } | null>(null)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
@@ -297,8 +374,146 @@ export function KanbanBoard() {
     return tagColors[tag] || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
   }
 
+  const getInitials = (name: string) => {
+    const names = name.split(" ")
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase()
+    }
+    return name.slice(0, 2).toUpperCase()
+  }
+
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-4">
+      <div className="flex items-center gap-2">
+        <Button
+          variant={selectedPeriod === "30days" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setSelectedPeriod("30days")}
+          className={cn(
+            selectedPeriod === "30days" 
+              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" 
+              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800"
+          )}
+        >
+          30 Dias
+        </Button>
+        <Button
+          variant={selectedPeriod === "3months" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setSelectedPeriod("3months")}
+          className={cn(
+            selectedPeriod === "3months" 
+              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" 
+              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800"
+          )}
+        >
+          3 Meses
+        </Button>
+        <Button
+          variant={selectedPeriod === "6months" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setSelectedPeriod("6months")}
+          className={cn(
+            selectedPeriod === "6months" 
+              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" 
+              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800"
+          )}
+        >
+          6 Meses
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card 
+          className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedMetric("members")}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 text-muted-foreground dark:text-gray-400">
+              <Users className="h-4 w-4" />
+              <span className="text-sm">Membros da Equipe</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground dark:text-gray-500" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-foreground dark:text-gray-100">{metrics.members}</span>
+              <span className="text-sm text-muted-foreground dark:text-gray-400">Membros</span>
+            </div>
+            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              {metrics.membersDelta}
+            </Badge>
+          </div>
+        </Card>
+
+        <Card 
+          className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedMetric("projects")}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 text-muted-foreground dark:text-gray-400">
+              <FileText className="h-4 w-4" />
+              <span className="text-sm">Projetos Ativos</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground dark:text-gray-500" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-foreground dark:text-gray-100">{metrics.projects}</span>
+              <span className="text-sm text-muted-foreground dark:text-gray-400">Projetos</span>
+            </div>
+            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              {metrics.projectsDelta}
+            </Badge>
+          </div>
+        </Card>
+
+        <Card 
+          className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedMetric("hours")}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 text-muted-foreground dark:text-gray-400">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm">Horas Trabalhadas</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground dark:text-gray-500" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-foreground dark:text-gray-100">{metrics.hours}</span>
+              <span className="text-sm text-muted-foreground dark:text-gray-400">Horas</span>
+            </div>
+            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              {metrics.hoursDelta}
+            </Badge>
+          </div>
+        </Card>
+
+        <Card 
+          className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedMetric("completion")}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 text-muted-foreground dark:text-gray-400">
+              <TrendingUp className="h-4 w-4" />
+              <span className="text-sm">Taxa de Conclusão</span>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground dark:text-gray-500" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-foreground dark:text-gray-100">{metrics.completion}%</span>
+              <span className="text-sm text-muted-foreground dark:text-gray-400">Concluídas</span>
+            </div>
+            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              {metrics.completionDelta}
+            </Badge>
+          </div>
+        </Card>
+      </div>
+
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
           {/* Project Selector */}
@@ -346,16 +561,12 @@ export function KanbanBoard() {
             )}
           </div>
 
-          {/* Team Members Avatars */}
           <div className="flex items-center -space-x-2">
             {teamMembers.slice(0, 3).map((member) => (
               <Avatar key={member.id} className="h-9 w-9 border-2 border-background dark:border-gray-950 hover:z-10 transition-transform hover:scale-110 cursor-pointer">
                 <AvatarImage src={member.avatar || "/placeholder.svg"} />
-                <AvatarFallback className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                  {member.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                <AvatarFallback className="text-xs font-semibold bg-gray-200 text-blue-600 dark:bg-gray-800 dark:text-blue-400">
+                  {getInitials(member.name)}
                 </AvatarFallback>
               </Avatar>
             ))}
@@ -366,19 +577,46 @@ export function KanbanBoard() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+            <SelectTrigger className="w-[180px] dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100">
+              <SelectValue placeholder="Todas prioridades" />
+            </SelectTrigger>
+            <SelectContent className="dark:bg-gray-950 dark:border-gray-800">
+              <SelectItem value="all">Todas prioridades</SelectItem>
+              <SelectItem value="high">Alta prioridade</SelectItem>
+              <SelectItem value="medium">Média prioridade</SelectItem>
+              <SelectItem value="low">Baixa prioridade</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedStage} onValueChange={setSelectedStage}>
+            <SelectTrigger className="w-[180px] dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100">
+              <SelectValue placeholder="Todos estágios" />
+            </SelectTrigger>
+            <SelectContent className="dark:bg-gray-950 dark:border-gray-800">
+              <SelectItem value="all">Todos estágios</SelectItem>
+              <SelectItem value="todo">A Fazer</SelectItem>
+              <SelectItem value="in-progress">Em Progresso</SelectItem>
+              <SelectItem value="review">Em Revisão</SelectItem>
+              <SelectItem value="done">Concluído</SelectItem>
+            </SelectContent>
+          </Select>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-gray-500" />
             <input
               type="text"
-              placeholder="Buscar..."
+              placeholder="Buscar tarefas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-3 py-2 text-sm border border-border dark:border-gray-800 bg-background dark:bg-gray-900 text-foreground dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
-          <Button variant="outline" size="sm" className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800">
-            <Filter className="h-4 w-4 mr-2" />
-            Filtrar
-          </Button>
-          <Button variant="default" size="sm" className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-500">
+          
+          <Button 
+            onClick={() => setNewTaskModalOpen(true)}
+            variant="default" size="sm" 
+            className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-500">
             <Plus className="h-4 w-4 mr-2" />
             Nova Tarefa
           </Button>
@@ -387,7 +625,7 @@ export function KanbanBoard() {
 
       <div className="w-full overflow-x-auto">
         <div className="flex gap-4 pb-4 min-w-full">
-          {columns.map((column) => (
+          {filteredColumns.map((column) => (
             <div
               key={column.id}
               className="flex-1 min-w-[320px] rounded-lg p-4 bg-gray-100 dark:bg-gray-900/90 border border-gray-300 dark:border-gray-800"
@@ -406,7 +644,7 @@ export function KanbanBoard() {
                 </Button>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-[calc(100vh-400px)] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
                 {column.tasks.map((task) => (
                   <Card
                     key={task.id}
@@ -443,11 +681,8 @@ export function KanbanBoard() {
                         {task.assignees[0] && (
                           <Avatar className="h-5 w-5">
                             <AvatarImage src={task.assignees[0].avatar || "/placeholder.svg"} />
-                            <AvatarFallback className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                              {task.assignees[0].name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
+                            <AvatarFallback className="text-[10px] font-semibold bg-gray-200 text-blue-600 dark:bg-gray-800 dark:text-blue-400">
+                              {getInitials(task.assignees[0].name)}
                             </AvatarFallback>
                           </Avatar>
                         )}
@@ -479,6 +714,173 @@ export function KanbanBoard() {
           ))}
         </div>
       </div>
+
+      <Dialog open={!!selectedMetric} onOpenChange={(open) => !open && setSelectedMetric(null)}>
+        <DialogContent className="max-w-2xl bg-background dark:bg-gray-950 border-border dark:border-gray-800">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-bold text-foreground dark:text-gray-100 flex items-center gap-2">
+                {selectedMetric === "members" && <><Users className="h-5 w-5" /> Detalhes da Equipe</>}
+                {selectedMetric === "projects" && <><FileText className="h-5 w-5" /> Detalhes dos Projetos</>}
+                {selectedMetric === "hours" && <><Clock className="h-5 w-5" /> Detalhes das Horas</>}
+                {selectedMetric === "completion" && <><TrendingUp className="h-5 w-5" /> Detalhes da Conclusão</>}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl font-bold text-foreground dark:text-gray-100">
+                {selectedMetric === "members" && metrics.members}
+                {selectedMetric === "projects" && metrics.projects}
+                {selectedMetric === "hours" && metrics.hours}
+                {selectedMetric === "completion" && `${metrics.completion}%`}
+              </span>
+              <span className="text-lg text-muted-foreground dark:text-gray-400">
+                {selectedMetric === "members" && "Membros"}
+                {selectedMetric === "projects" && "Projetos"}
+                {selectedMetric === "hours" && "Horas"}
+                {selectedMetric === "completion" && "Concluídas"}
+              </span>
+            </div>
+
+            <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              {selectedMetric === "members" && metrics.membersDelta}
+              {selectedMetric === "projects" && metrics.projectsDelta}
+              {selectedMetric === "hours" && metrics.hoursDelta}
+              {selectedMetric === "completion" && metrics.completionDelta}
+            </Badge>
+
+            {selectedMetric === "members" && (
+              <div className="space-y-4">
+                <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Distribuição por Função</h4>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Técnicos de Manutenção</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">8 Pessoas</span>
+                    </div>
+                    <Progress value={33} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Engenheiros</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">6 Pessoas</span>
+                    </div>
+                    <Progress value={25} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-orange-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Operadores</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">10 Pessoas</span>
+                    </div>
+                    <Progress value={42} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-purple-500" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedMetric === "projects" && (
+              <div className="space-y-4">
+                <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Distribuição por Status</h4>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Concluídos</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">45 Projetos</span>
+                    </div>
+                    <Progress value={66} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-green-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Em Andamento</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">{metrics.projects} Projetos</span>
+                    </div>
+                    <Progress value={18} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Planejados</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">11 Projetos</span>
+                    </div>
+                    <Progress value={16} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-orange-500" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedMetric === "hours" && (
+              <div className="space-y-4">
+                <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Distribuição por Departamento</h4>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Manutenção Preventiva</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">520 Horas</span>
+                    </div>
+                    <Progress value={42} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Manutenção Corretiva</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">428 Horas</span>
+                    </div>
+                    <Progress value={34} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-orange-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Automação</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">300 Horas</span>
+                    </div>
+                    <Progress value={24} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-purple-500" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedMetric === "completion" && (
+              <div className="space-y-4">
+                <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Detalhamento da Taxa</h4>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Tarefas Concluídas no Prazo</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">92%</span>
+                    </div>
+                    <Progress value={92} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-green-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Tarefas com Atraso</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">8%</span>
+                    </div>
+                    <Progress value={8} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-red-500" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground dark:text-gray-400">Qualidade Média</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">94%</span>
+                    </div>
+                    <Progress value={94} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background border-border">
@@ -577,11 +979,8 @@ export function KanbanBoard() {
                       <div key={idx} className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={assignee.avatar || "/placeholder.svg"} />
-                          <AvatarFallback className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                            {assignee.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
+                          <AvatarFallback className="text-xs font-semibold bg-gray-200 text-blue-600 dark:bg-gray-800 dark:text-blue-400">
+                            {getInitials(assignee.name)}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm">{assignee.name}</span>
@@ -727,6 +1126,8 @@ export function KanbanBoard() {
           )}
         </DialogContent>
       </Dialog>
+
+      <NewTaskModal open={newTaskModalOpen} onOpenChange={setNewTaskModalOpen} />
     </div>
   )
 }

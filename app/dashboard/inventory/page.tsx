@@ -20,6 +20,7 @@ import {
   Trash2,
   Download,
 } from "lucide-react"
+import { MetricsReportModal } from "@/components/metrics-report-modal"
 
 interface Machine {
   id: string
@@ -39,6 +40,7 @@ interface Machine {
 export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
+  const [metricsReportOpen, setMetricsReportOpen] = useState(false)
 
   const machines: Machine[] = [
     {
@@ -194,7 +196,7 @@ export default function InventoryPage() {
               <SelectItem value="critical">Crítico</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => setMetricsReportOpen(true)}>
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
@@ -385,6 +387,21 @@ export default function InventoryPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Metrics Report Modal */}
+      <MetricsReportModal
+        open={metricsReportOpen}
+        onClose={() => setMetricsReportOpen(false)}
+        reportType="inventory"
+        filters={{
+          status: filterStatus !== "all" ? filterStatus : undefined,
+          search: searchQuery || undefined,
+        }}
+        data={{
+          machines,
+          filteredMachines,
+        }}
+      />
     </div>
   )
 }

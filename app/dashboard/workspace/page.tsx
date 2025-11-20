@@ -78,7 +78,7 @@ export default function WorkspacePage() {
   return (
     <div className="fixed inset-0 top-16 bg-background overflow-hidden">
       {/* Top Bar */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur-sm border-b border-border z-20 flex items-center justify-between px-6 pl-20">
+      <div className="absolute top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur-sm border-b border-border z-20 flex items-center justify-between px-6 pl-24">
         <div className="flex items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Monitor de Máquinas</h1>
@@ -97,7 +97,7 @@ export default function WorkspacePage() {
           </select>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pl-28">
           <Button
             variant={renderMode === "3d" ? "default" : "outline"}
             onClick={() => setRenderMode("3d")}

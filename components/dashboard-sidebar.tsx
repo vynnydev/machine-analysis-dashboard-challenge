@@ -111,46 +111,48 @@ export function DashboardSidebar({ sidebarOpen, setSidebarOpen }: DashboardSideb
     >
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-blue-700 dark:border-blue-800 min-h-[73px]">
-          {!collapsed && (
-            <div className="flex-1 overflow-hidden">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-white truncate">Cognitiva Analytics</h1>
+        <div className="p-6 border-b border-blue-700 dark:border-blue-800">
+          {!collapsed ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-bold text-white">Cognitiva Analytics</h1>
+                {/* Mobile close button */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700 h-7 w-7"
-                  onClick={() => setCollapsed(!collapsed)}
-                  title="Minimizar menu"
+                  className="lg:hidden text-blue-200 hover:text-white hover:bg-blue-700 h-7 w-7"
+                  onClick={() => setSidebarOpen(false)}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
-              <p className="text-xs text-blue-200 mt-1">Análise Preditiva</p>
+              <p className="text-xs text-blue-200">Análise Preditiva</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden lg:flex w-full text-blue-200 hover:text-white hover:bg-blue-700 justify-start gap-2"
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="text-xs">Minimizar Menu</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3">
+              <div className="text-center">
+                <p className="text-xs font-bold text-white">CA</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700"
+                onClick={() => setCollapsed(!collapsed)}
+                title="Expandir menu"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           )}
-
-          {collapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700 w-full"
-              onClick={() => setCollapsed(!collapsed)}
-              title="Expandir menu"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          )}
-
-          {/* Mobile close button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-blue-200 hover:text-white hover:bg-blue-700"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
         </div>
 
         {/* Navigation */}

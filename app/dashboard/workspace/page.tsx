@@ -78,9 +78,9 @@ export default function WorkspacePage() {
   return (
     <div className="fixed inset-0 top-16 bg-background overflow-hidden">
       {/* Top Bar */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur-sm border-b border-border z-20 flex items-center justify-between px-6">
+      <div className="absolute top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur-sm border-b border-border z-20 flex items-center justify-between px-6 pl-72">
         <div className="flex items-center gap-4">
-          <div className="pl-20">
+          <div>
             <h1 className="text-2xl font-bold text-foreground">Monitor de Máquinas</h1>
             <p className="text-sm text-muted-foreground">{facility?.name || "Configure seu ambiente de trabalho"}</p>
           </div>
@@ -131,7 +131,7 @@ export default function WorkspacePage() {
       </div>
 
       {/* Main Content */}
-      <div className="absolute top-16 left-0 right-0 bottom-0">
+      <div className="absolute top-16 left-0 right-0 bottom-0 pl-72">
         <Card
           className={`absolute left-6 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 ${
             leftPanelExpanded ? "w-80 h-auto" : "w-16 h-16"

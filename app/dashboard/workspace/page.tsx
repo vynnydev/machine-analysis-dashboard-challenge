@@ -154,7 +154,7 @@ export default function WorkspacePage() {
               ? "w-16 h-16"
               : leftPanelState === "semi"
                 ? "w-[520px] h-44"
-                : "w-[560px] h-auto"
+                : "w-[560px] h-[500px]"
           }`}
         >
           <div className="relative h-full">

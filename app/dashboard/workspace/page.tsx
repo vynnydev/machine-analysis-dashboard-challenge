@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, RefreshCw, ChevronUp, ChevronDown, X } from "lucide-react"
+import { Plus, RefreshCw, ChevronUp, ChevronDown, X, Box, Layers } from "lucide-react"
 import { SetupFacilityModal } from "@/components/setup-facility-modal"
 import { AddMachineModal } from "@/components/add-machine-modal"
 import { WorkspaceViewer3D } from "@/components/workspace-viewer-3d"
@@ -14,8 +14,9 @@ export default function WorkspacePage() {
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
   const [selectedZone, setSelectedZone] = useState("Zone T2")
   const [selectedMachine, setSelectedMachine] = useState<any>(null)
-  const [leftPanelExpanded, setLeftPanelExpanded] = useState(true)
-  const [rightPanelExpanded, setRightPanelExpanded] = useState(true)
+  const [leftPanelExpanded, setLeftPanelExpanded] = useState(false)
+  const [rightPanelExpanded, setRightPanelExpanded] = useState(false)
+  const [renderMode, setRenderMode] = useState<"3d" | "svg">("3d")
 
   // Mock data - in production this would come from an API/database
   const [facility, setFacility] = useState<any>({
@@ -97,6 +98,24 @@ export default function WorkspacePage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant={renderMode === "3d" ? "default" : "outline"}
+            onClick={() => setRenderMode("3d")}
+            className="gap-2"
+            size="sm"
+          >
+            <Box className="h-4 w-4" />
+            3D
+          </Button>
+          <Button
+            variant={renderMode === "svg" ? "default" : "outline"}
+            onClick={() => setRenderMode("svg")}
+            className="gap-2"
+            size="sm"
+          >
+            <Layers className="h-4 w-4" />
+            SVG
+          </Button>
           <Button variant="outline" onClick={handleSyncAPI} className="gap-2 bg-transparent">
             <RefreshCw className="h-4 w-4" />
             Sincronizar API
@@ -112,83 +131,86 @@ export default function WorkspacePage() {
       </div>
 
       {/* Main Content */}
-      <div className="absolute top-16 left-0 right-0 bottom-0 flex">
-        {/* Left Sidebar */}
-        <div
-          className={`bg-card/95 backdrop-blur-sm border-r border-border transition-all duration-300 relative ${
-            leftPanelExpanded ? "w-80" : "w-16"
+      <div className="absolute top-16 left-0 right-0 bottom-0">
+        <Card
+          className={`absolute left-6 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 ${
+            leftPanelExpanded ? "w-80 h-auto" : "w-16 h-16"
           }`}
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLeftPanelExpanded(!leftPanelExpanded)}
-            className="absolute -right-3 top-4 z-10 h-6 w-6 rounded-full bg-background border border-border"
-          >
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLeftPanelExpanded(!leftPanelExpanded)}
+              className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background"
+            >
+              {leftPanelExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+
             {leftPanelExpanded ? (
-              <ChevronDown className="h-4 w-4 rotate-90" />
-            ) : (
-              <ChevronUp className="h-4 w-4 rotate-90" />
-            )}
-          </Button>
-
-          {leftPanelExpanded && (
-            <div className="p-6 space-y-6 overflow-y-auto h-full">
-              {/* Total Equipment */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <div className="h-3 w-3 rounded-full bg-emerald-500" />
+              <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                {/* Total Equipment */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                      <div className="h-3 w-3 rounded-full bg-emerald-500" />
+                    </div>
+                    <span>Total de Equipamentos</span>
                   </div>
-                  <span>Total de Equipamentos</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-bold text-foreground">{totalMachines}</span>
+                    <span className="text-sm text-muted-foreground">Equipamentos</span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-bold text-foreground">{totalMachines}</span>
-                  <span className="text-sm text-muted-foreground">Equipamentos</span>
-                </div>
-              </div>
 
-              {/* Operating */}
-              <div className="flex items-center justify-between py-3 border-t border-border">
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="text-sm text-foreground">Operando</span>
+                {/* Operating */}
+                <div className="flex items-center justify-between py-3 border-t border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="text-sm text-foreground">Operando</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-semibold text-foreground">{operatingMachines}</span>
+                    <span className="text-xs text-muted-foreground">Equipamentos</span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-semibold text-foreground">{operatingMachines}</span>
-                  <span className="text-xs text-muted-foreground">Equipamentos</span>
-                </div>
-              </div>
 
-              {/* In Maintenance */}
-              <div className="flex items-center justify-between py-3 border-t border-border">
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span className="text-sm text-foreground">Em Manutenção</span>
+                {/* In Maintenance */}
+                <div className="flex items-center justify-between py-3 border-t border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-amber-500" />
+                    <span className="text-sm text-foreground">Em Manutenção</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-semibold text-foreground">{maintenanceMachines}</span>
+                    <span className="text-xs text-muted-foreground">Equipamentos</span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-semibold text-foreground">{maintenanceMachines}</span>
-                  <span className="text-xs text-muted-foreground">Equipamentos</span>
-                </div>
-              </div>
 
-              {/* Waiting Maintenance */}
-              <div className="flex items-center justify-between py-3 border-t border-border">
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span className="text-sm text-foreground">Aguardando Manutenção</span>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-semibold text-foreground">{waitingMachines}</span>
-                  <span className="text-xs text-muted-foreground">Equipamentos</span>
+                {/* Waiting Maintenance */}
+                <div className="flex items-center justify-between py-3 border-t border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-amber-500" />
+                    <span className="text-sm text-foreground">Aguardando Manutenção</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-semibold text-foreground">{waitingMachines}</span>
+                    <span className="text-xs text-muted-foreground">Equipamentos</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="p-4 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full bg-emerald-500" />
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
 
         {/* Center - 3D Viewer */}
-        <div className="flex-1 relative">
+        <div className="w-full h-full">
           <Suspense
             fallback={<div className="flex items-center justify-center h-full">Carregando visualização 3D...</div>}
           >
@@ -197,6 +219,7 @@ export default function WorkspacePage() {
               machines={machines}
               selectedZone={selectedZone}
               onMachineClick={setSelectedMachine}
+              renderMode={renderMode}
             />
           </Suspense>
 
@@ -282,98 +305,100 @@ export default function WorkspacePage() {
           )}
         </div>
 
-        {/* Right Sidebar */}
-        <div
-          className={`bg-card/95 backdrop-blur-sm border-l border-border transition-all duration-300 relative ${
-            rightPanelExpanded ? "w-96" : "w-16"
+        <Card
+          className={`absolute right-6 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 ${
+            rightPanelExpanded ? "w-96 h-auto" : "w-16 h-16"
           }`}
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setRightPanelExpanded(!rightPanelExpanded)}
-            className="absolute -left-3 top-4 z-10 h-6 w-6 rounded-full bg-background border border-border"
-          >
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setRightPanelExpanded(!rightPanelExpanded)}
+              className="absolute left-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background"
+            >
+              {rightPanelExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+
             {rightPanelExpanded ? (
-              <ChevronUp className="h-4 w-4 -rotate-90" />
+              <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                {/* Metrics Chart */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-medium text-foreground">Métricas de Equipamentos</h3>
+                    <span className="text-xs text-emerald-500">↗ 86.8%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-4">Indicadores médios de desempenho</p>
+                  <div className="space-y-3">
+                    <div className="flex items-end justify-between h-32 gap-2">
+                      <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                        <div className="w-full bg-cyan-500 rounded-t" style={{ height: "70%" }} />
+                        <span className="text-[10px] text-muted-foreground">Efic.</span>
+                      </div>
+                      <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                        <div className="w-full bg-cyan-500 rounded-t" style={{ height: "55%" }} />
+                        <span className="text-[10px] text-muted-foreground">Desemp.</span>
+                      </div>
+                      <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                        <div className="w-full bg-cyan-500 rounded-t" style={{ height: "85%" }} />
+                        <span className="text-[10px] text-muted-foreground">Dispon.</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-xs text-muted-foreground">Efic.</span>
+                      <span className="text-sm font-semibold">86.8%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-amber-500" />
+                      <span className="text-xs text-muted-foreground">Desemp.</span>
+                      <span className="text-sm font-semibold">94.3%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-red-500" />
+                      <span className="text-xs text-muted-foreground">Qualid.</span>
+                      <span className="text-sm font-semibold">98.3%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-blue-500" />
+                      <span className="text-xs text-muted-foreground">Dispon.</span>
+                      <span className="text-sm font-semibold">92.0%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Efficiency Over Time */}
+                <div className="border-t border-border pt-6">
+                  <h3 className="text-sm font-medium text-foreground mb-2">Eficiência ao Longo do Tempo</h3>
+                  <p className="text-xs text-muted-foreground mb-4">Últimas 6 horas de desempenho</p>
+                  <div className="flex items-baseline justify-between mb-2">
+                    <span className="text-3xl font-bold text-emerald-500">90.8%</span>
+                    <span className="text-xs text-emerald-500">↗ 0.5%</span>
+                  </div>
+                  <div className="h-20 flex items-end gap-1">
+                    {[78, 82, 85, 88, 89, 90, 91, 92].map((value, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 bg-gradient-to-t from-cyan-500 to-blue-500 rounded-t"
+                        style={{ height: `${value}%` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
             ) : (
-              <ChevronDown className="h-4 w-4 -rotate-90" />
+              <div className="p-4 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full bg-cyan-500" />
+                </div>
+              </div>
             )}
-          </Button>
-
-          {rightPanelExpanded && (
-            <div className="p-6 space-y-6 overflow-y-auto h-full">
-              {/* Metrics Chart */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-foreground">Métricas de Equipamentos</h3>
-                  <span className="text-xs text-emerald-500">↗ 86.8%</span>
-                </div>
-                <p className="text-xs text-muted-foreground mb-4">Indicadores médios de desempenho</p>
-                <div className="space-y-3">
-                  <div className="flex items-end justify-between h-32 gap-2">
-                    <div className="flex-1 flex flex-col justify-end items-center gap-1">
-                      <div className="w-full bg-cyan-500 rounded-t" style={{ height: "70%" }} />
-                      <span className="text-[10px] text-muted-foreground">Efic.</span>
-                    </div>
-                    <div className="flex-1 flex flex-col justify-end items-center gap-1">
-                      <div className="w-full bg-cyan-500 rounded-t" style={{ height: "55%" }} />
-                      <span className="text-[10px] text-muted-foreground">Desemp.</span>
-                    </div>
-                    <div className="flex-1 flex flex-col justify-end items-center gap-1">
-                      <div className="w-full bg-cyan-500 rounded-t" style={{ height: "85%" }} />
-                      <span className="text-[10px] text-muted-foreground">Dispon.</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span className="text-xs text-muted-foreground">Efic.</span>
-                    <span className="text-sm font-semibold">86.8%</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span className="text-xs text-muted-foreground">Desemp.</span>
-                    <span className="text-sm font-semibold">94.3%</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-red-500" />
-                    <span className="text-xs text-muted-foreground">Qualid.</span>
-                    <span className="text-sm font-semibold">98.3%</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-blue-500" />
-                    <span className="text-xs text-muted-foreground">Dispon.</span>
-                    <span className="text-sm font-semibold">92.0%</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Efficiency Over Time */}
-              <div className="border-t border-border pt-6">
-                <h3 className="text-sm font-medium text-foreground mb-2">Eficiência ao Longo do Tempo</h3>
-                <p className="text-xs text-muted-foreground mb-4">Últimas 6 horas de desempenho</p>
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-3xl font-bold text-emerald-500">90.8%</span>
-                  <span className="text-xs text-emerald-500">↗ 0.5%</span>
-                </div>
-                {/* Simple line chart representation */}
-                <div className="h-20 flex items-end gap-1">
-                  {[78, 82, 85, 88, 89, 90, 91, 92].map((value, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 bg-gradient-to-t from-cyan-500 to-blue-500 rounded-t"
-                      style={{ height: `${value}%` }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        </Card>
       </div>
 
       {/* Modals */}

@@ -11,7 +11,6 @@ import {
   Users,
   LayoutDashboard,
   ListChecks,
-  Activity,
   Package,
   BarChart3,
   LogOut,
@@ -60,11 +59,6 @@ export function DashboardSidebar({ sidebarOpen, setSidebarOpen }: DashboardSideb
       name: "Equipe",
       href: "/dashboard/team",
       icon: Users,
-    },
-    {
-      name: "Monitoramento",
-      href: "/dashboard/monitoring",
-      icon: Activity,
     },
     {
       name: "Oficina Virtual",
@@ -120,33 +114,43 @@ export function DashboardSidebar({ sidebarOpen, setSidebarOpen }: DashboardSideb
         <div className="flex items-center justify-between p-6 border-b border-blue-700 dark:border-blue-800 min-h-[73px]">
           {!collapsed && (
             <div className="flex-1 overflow-hidden">
-              <h1 className="text-xl font-bold text-white truncate">Cognitiva Analytics</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-white truncate">Cognitiva Analytics</h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700 h-7 w-7"
+                  onClick={() => setCollapsed(!collapsed)}
+                  title="Minimizar menu"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              </div>
               <p className="text-xs text-blue-200 mt-1">Análise Preditiva</p>
             </div>
           )}
 
-          <div className="flex items-center gap-1">
-            {/* Mobile close button */}
+          {collapsed && (
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-blue-200 hover:text-white hover:bg-blue-700"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-
-            {/* Collapse/Expand button (desktop only) */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700"
+              className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700 w-full"
               onClick={() => setCollapsed(!collapsed)}
-              title={collapsed ? "Expandir menu" : "Minimizar menu"}
+              title="Expandir menu"
             >
-              {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+              <ChevronRight className="h-5 w-5" />
             </Button>
-          </div>
+          )}
+
+          {/* Mobile close button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden text-blue-200 hover:text-white hover:bg-blue-700"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
         {/* Navigation */}

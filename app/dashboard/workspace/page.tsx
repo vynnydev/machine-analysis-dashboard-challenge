@@ -346,7 +346,7 @@ export default function WorkspacePage() {
               </Button>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-base font-semibold text-foreground">Métricas de Equipamentos</h3>
                     <p className="text-xs text-muted-foreground">Indicadores médios de desempenho</p>

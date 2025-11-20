@@ -1,130 +1,25 @@
 "use client"
 
 import React, { Suspense } from "react"
-import {
-  CreditCard,
-  Sun,
-  Moon,
-  Bell,
-  Sparkles,
-  Settings,
-  Wrench,
-  Truck,
-  Workflow,
-  Search,
-  FileText,
-  Users,
-} from "lucide-react"
+import { Sun, Moon, Bell, Sparkles, Search, Menu } from "lucide-react"
 import { useTheme } from "@/contexts/theme-context"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import {
-  LayoutDashboard,
-  ListChecks,
-  Activity,
-  Package,
-  BarChart3,
-  LogOut,
-  Menu,
-  X,
-  SpaceIcon as WorkspaceIcon,
-} from "lucide-react"
 import { useState } from "react"
 import { NotificationsPanel } from "@/components/notifications-panel"
 import { AIAssistantPopup } from "@/components/ai-assistant-popup"
 import { CommandPalette } from "@/components/command-palette"
-import { AccountSwitcher } from "@/components/account-switcher"
+import { DashboardSidebar } from "@/components/dashboard-sidebar"
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
-
-  const user = {
-    name: "João Silva",
-    email: "joao.silva@cognitiva.com",
-  }
-
-  const navigation = [
-    {
-      name: "Monitor de Máquinas",
-      href: "/dashboard/workspace",
-      icon: WorkspaceIcon,
-    },
-    {
-      name: "Tarefas",
-      href: "/dashboard/tasks",
-      icon: ListChecks,
-    },
-    {
-      name: "Análise de Máquinas",
-      href: "/dashboard/analysis",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Relatórios",
-      href: "/dashboard/reports",
-      icon: FileText,
-    },
-    {
-      name: "Equipe",
-      href: "/dashboard/team",
-      icon: Users,
-    },
-    {
-      name: "Monitoramento",
-      href: "/dashboard/monitoring",
-      icon: Activity,
-    },
-    {
-      name: "Oficina Virtual",
-      href: "/dashboard/workshops",
-      icon: Wrench,
-    },
-    {
-      name: "Transporte & Reboque",
-      href: "/dashboard/transport",
-      icon: Truck,
-    },
-    {
-      name: "Automatizar Fluxos",
-      href: "/dashboard/workflows",
-      icon: Workflow,
-    },
-    {
-      name: "Inventário",
-      href: "/dashboard/inventory",
-      icon: Package,
-    },
-    {
-      name: "Diagnósticos",
-      href: "/dashboard/diagnostics",
-      icon: BarChart3,
-    },
-    {
-      name: "Faturamento",
-      href: "/dashboard/billing",
-      icon: CreditCard,
-    },
-    {
-      name: "Configurações",
-      href: "/dashboard/settings",
-      icon: Settings,
-    },
-  ]
-
-  const handleLogout = () => {
-    console.log("[v0] Logout clicked (auth disabled for development)")
-  }
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -140,71 +35,15 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background flex">
       <Suspense fallback={null}>
+        {/* Mobile overlay */}
         {sidebarOpen && (
           <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
 
-        <aside
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-blue-900 to-blue-800 border-r border-blue-700 transform transition-transform duration-300 lg:translate-x-0 lg:static",
-            sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          )}
-        >
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between p-6 border-b border-blue-700">
-              <div>
-                <h1 className="text-xl font-bold text-white">Cognitiva Analytics</h1>
-                <p className="text-xs text-blue-200 mt-1">Análise Preditiva</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden text-blue-200 hover:text-white hover:bg-blue-700"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-
-            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href
-                const Icon = item.icon
-
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <Button
-                      variant={isActive ? "secondary" : "ghost"}
-                      className={cn(
-                        "w-full justify-start text-blue-100 hover:text-white hover:bg-blue-700/50",
-                        isActive && "bg-blue-600 text-white hover:bg-blue-500",
-                      )}
-                      onClick={() => setSidebarOpen(false)}
-                    >
-                      <Icon className="h-5 w-5 mr-3" />
-                      {item.name}
-                    </Button>
-                  </Link>
-                )
-              })}
-            </nav>
-
-            <div className="p-4 border-t border-blue-700 space-y-3">
-              <AccountSwitcher />
-
-              <Button
-                variant="outline"
-                className="w-full bg-red-500/10 border-red-400/20 hover:bg-red-500/20 text-red-300 hover:text-red-200"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
-              </Button>
-            </div>
-          </div>
-        </aside>
+        <DashboardSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <div className="flex-1 flex flex-col min-h-screen">
+          {/* Header */}
           <header className="bg-card border-b border-border sticky top-0 z-30">
             <div className="flex items-center justify-between p-4 gap-4">
               <div className="flex items-center gap-4">
@@ -258,9 +97,11 @@ export default function DashboardLayout({
             </div>
           </header>
 
+          {/* Main content */}
           <main className="flex-1 p-6 overflow-auto">{children}</main>
         </div>
 
+        {/* Modals */}
         <NotificationsPanel open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
         <AIAssistantPopup open={aiAssistantOpen} onClose={() => setAiAssistantOpen(false)} />
         <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />

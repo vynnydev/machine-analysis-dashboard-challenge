@@ -147,65 +147,7 @@ export default function WorkspacePage() {
               {leftPanelExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
 
-            {leftPanelExpanded ? (
-              <div className="p-6 left-24 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-                {/* Total Equipment */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                    </div>
-                    <span>Total de Equipamentos</span>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-foreground">{totalMachines}</span>
-                    <span className="text-sm text-muted-foreground">Equipamentos</span>
-                  </div>
-                </div>
 
-                {/* Operating */}
-                <div className="flex items-center justify-between py-3 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span className="text-sm text-foreground">Operando</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold text-foreground">{operatingMachines}</span>
-                    <span className="text-xs text-muted-foreground">Equipamentos</span>
-                  </div>
-                </div>
-
-                {/* In Maintenance */}
-                <div className="flex items-center justify-between py-3 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span className="text-sm text-foreground">Em Manutenção</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold text-foreground">{maintenanceMachines}</span>
-                    <span className="text-xs text-muted-foreground">Equipamentos</span>
-                  </div>
-                </div>
-
-                {/* Waiting Maintenance */}
-                <div className="flex items-center justify-between py-3 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span className="text-sm text-foreground">Aguardando Manutenção</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold text-foreground">{waitingMachines}</span>
-                    <span className="text-xs text-muted-foreground">Equipamentos</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 flex items-center justify-center">
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                </div>
-              </div>
-            )}
           </div>
         </Card>
 

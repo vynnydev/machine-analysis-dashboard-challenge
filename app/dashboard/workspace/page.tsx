@@ -80,7 +80,7 @@ export default function WorkspacePage() {
       {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur-sm border-b border-border z-20 flex items-center justify-between px-6">
         <div className="flex items-center gap-4">
-          <div>
+          <div className="left-20">
             <h1 className="text-2xl font-bold text-foreground">Monitor de Máquinas</h1>
             <p className="text-sm text-muted-foreground">{facility?.name || "Configure seu ambiente de trabalho"}</p>
           </div>

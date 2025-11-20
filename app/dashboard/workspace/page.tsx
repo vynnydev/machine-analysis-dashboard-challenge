@@ -14,8 +14,8 @@ export default function WorkspacePage() {
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
   const [selectedZone, setSelectedZone] = useState("Zone T2")
   const [selectedMachine, setSelectedMachine] = useState<any>(null)
-  const [leftPanelExpanded, setLeftPanelExpanded] = useState(false)
-  const [rightPanelExpanded, setRightPanelExpanded] = useState(false)
+  const [leftPanelState, setLeftPanelState] = useState<"minimized" | "semi" | "expanded">("semi")
+  const [rightPanelState, setRightPanelState] = useState<"minimized" | "semi" | "expanded">("semi")
   const [renderMode, setRenderMode] = useState<"3d" | "svg">("3d")
 
   // Mock data - in production this would come from an API/database
@@ -66,7 +66,22 @@ export default function WorkspacePage() {
     console.log("[v0] Syncing with API...")
   }
 
-  // Check if facility is set up
+  const toggleLeftPanel = () => {
+    setLeftPanelState((prev) => {
+      if (prev === "minimized") return "semi"
+      if (prev === "semi") return "expanded"
+      return "minimized"
+    })
+  }
+
+  const toggleRightPanel = () => {
+    setRightPanelState((prev) => {
+      if (prev === "minimized") return "semi"
+      if (prev === "semi") return "expanded"
+      return "minimized"
+    })
+  }
+
   const isFacilitySetup = facility && facility.name
 
   useEffect(() => {
@@ -132,23 +147,49 @@ export default function WorkspacePage() {
 
       {/* Main Content */}
       <div className="absolute top-16 left-0 right-0 bottom-0 pl-72">
+        {/* Left Panel */}
         <Card
           className={`absolute left-24 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 ${
-            leftPanelExpanded ? "w-80 h-auto" : "w-16 h-16"
+            leftPanelState === "minimized" ? "w-16 h-16" : leftPanelState === "semi" ? "w-80 h-40" : "w-80 h-auto"
           }`}
         >
           <div className="relative">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setLeftPanelExpanded(!leftPanelExpanded)}
-              className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background"
+              onClick={toggleLeftPanel}
+              className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background z-10"
             >
-              {leftPanelExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {leftPanelState === "minimized" ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : leftPanelState === "semi" ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
             </Button>
 
-            {leftPanelExpanded ? (
-              <div className="p-6 left-24 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+            {leftPanelState === "minimized" ? (
+              <div className="p-4 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full bg-emerald-500" />
+                </div>
+              </div>
+            ) : leftPanelState === "semi" ? (
+              <div className="p-6 space-y-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <div className="h-3 w-3 rounded-full bg-emerald-500" />
+                  </div>
+                  <span>Total de Equipamentos</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-bold text-foreground">{totalMachines}</span>
+                  <span className="text-sm text-muted-foreground">Equipamentos</span>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
                 {/* Total Equipment */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -197,12 +238,6 @@ export default function WorkspacePage() {
                     <span className="text-2xl font-semibold text-foreground">{waitingMachines}</span>
                     <span className="text-xs text-muted-foreground">Equipamentos</span>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 flex items-center justify-center">
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <div className="h-3 w-3 rounded-full bg-emerald-500" />
                 </div>
               </div>
             )}
@@ -305,22 +340,63 @@ export default function WorkspacePage() {
           )}
         </div>
 
+        {/* Right Panel */}
         <Card
           className={`absolute right-6 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 ${
-            rightPanelExpanded ? "w-96 h-auto" : "w-16 h-16"
+            rightPanelState === "minimized" ? "w-16 h-16" : rightPanelState === "semi" ? "w-96 h-64" : "w-96 h-auto"
           }`}
         >
           <div className="relative">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setRightPanelExpanded(!rightPanelExpanded)}
-              className="absolute left-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background"
+              onClick={toggleRightPanel}
+              className="absolute left-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background z-10"
             >
-              {rightPanelExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {rightPanelState === "minimized" ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : rightPanelState === "semi" ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
             </Button>
 
-            {rightPanelExpanded ? (
+            {rightPanelState === "minimized" ? (
+              <div className="p-4 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full bg-cyan-500" />
+                </div>
+              </div>
+            ) : rightPanelState === "semi" ? (
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-foreground">Métricas de Equipamentos</h3>
+                  <span className="text-xs text-emerald-500 flex items-center gap-1">
+                    <span>↗</span>
+                    <span>86.8%</span>
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">Indicadores médios de desempenho</p>
+
+                {/* Beautiful gradient bar chart like "Eficiência ao Longo do Tempo" */}
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-3xl font-bold text-emerald-500">90.8%</span>
+                    <span className="text-xs text-emerald-500">↗ 0.5%</span>
+                  </div>
+                  <div className="h-24 flex items-end gap-1">
+                    {[78, 82, 85, 88, 89, 90, 91, 92].map((value, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 bg-gradient-to-t from-cyan-500 to-blue-500 rounded-t transition-all hover:opacity-80"
+                        style={{ height: `${value}%` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
               <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
                 {/* Metrics Chart */}
                 <div>
@@ -388,12 +464,6 @@ export default function WorkspacePage() {
                       />
                     ))}
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 flex items-center justify-center">
-                <div className="h-8 w-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                  <div className="h-3 w-3 rounded-full bg-cyan-500" />
                 </div>
               </div>
             )}

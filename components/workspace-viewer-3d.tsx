@@ -117,13 +117,14 @@ export function WorkspaceViewer3D({
   return (
     <div className="w-full h-full">
       <Canvas shadows>
-        <PerspectiveCamera makeDefault position={[10, 10, 10]} />
+        <PerspectiveCamera makeDefault position={[12, 12, 12]} />
         <OrbitControls
           enableZoom={true}
           enablePan={true}
           maxPolarAngle={Math.PI / 2}
-          minDistance={5}
-          maxDistance={30}
+          minDistance={8}
+          maxDistance={35}
+          target={[0, 0, 0]}
         />
         <ambientLight intensity={0.4} />
         <directionalLight
@@ -138,16 +139,18 @@ export function WorkspaceViewer3D({
 
         <FactoryFloor corridors={facility?.corridors || 3} />
 
-        {/* Render machines */}
         {machines.map((machine, idx) => {
-          const x = -6 + (machine.corridor - 1) * 4 + (machine.position.x - 1) * 0.5
-          const z = -5 + machine.position.y * 2
+          const corridorWidth = 4
+          const x = -6 + (machine.corridor - 1) * corridorWidth + (machine.position.x - 1) * 1
+          const z = -5 + machine.position.y * 2.5
           return (
             <group key={machine.id} onClick={() => onMachineClick(machine)}>
               <RoboticArm
                 position={[x, 0, z]}
                 rotation={idx * 0.5}
-                color={machine.status === "maintenance" ? "#f59e0b" : "#3b82f6"}
+                color={
+                  machine.status === "maintenance" ? "#f59e0b" : machine.status === "waiting" ? "#6366f1" : "#3b82f6"
+                }
                 status={machine.status}
               />
             </group>

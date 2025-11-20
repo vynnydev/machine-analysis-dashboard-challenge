@@ -25,36 +25,130 @@ export default function WorkspacePage() {
   const [setupModalOpen, setSetupModalOpen] = useState(false)
   const [addMachineModalOpen, setAddMachineModalOpen] = useState(false)
   const [selectedZone, setSelectedZone] = useState("Zone T2")
+  const [selectedLocation, setSelectedLocation] = useState("Oficina Centro Automotiva")
   const [selectedMachine, setSelectedMachine] = useState<any>(null)
   const [leftPanelState, setLeftPanelState] = useState<"minimized" | "semi" | "expanded">("semi")
   const [rightPanelState, setRightPanelState] = useState<"minimized" | "semi" | "expanded">("semi")
   const [renderMode, setRenderMode] = useState<"3d" | "svg">("3d")
 
-  // Mock data - in production this would come from an API/database
-  const [facility, setFacility] = useState<any>({
-    name: "Oficina Centro Automotiva",
-    type: "Oficina",
-    address: "Rua das Indústrias, 123",
-    zones: ["Zone T1", "Zone T2", "Zone T3"],
-    corridors: 3,
-  })
-
-  const [machines, setMachines] = useState<any[]>([
+  const locations = [
     {
-      id: "machine-1762603834049",
-      name: "Bomba Centrífuga",
-      type: "Bomba",
-      status: "maintenance",
-      corridor: 1,
-      position: { x: 1, y: 1 },
-      metrics: {
-        efficiency: 86.8,
-        performance: 94.3,
-        quality: 98.3,
-        availability: 92.0,
-      },
+      id: "location-1",
+      name: "Oficina Centro Automotiva",
+      type: "Oficina",
+      address: "Rua das Indústrias, 123",
+      zones: ["Zone T1", "Zone T2", "Zone T3"],
+      corridors: 3,
     },
-  ])
+    {
+      id: "location-2",
+      name: "Fábrica Industrial Norte",
+      type: "Indústria",
+      address: "Av. Industrial, 456",
+      zones: ["Setor A", "Setor B", "Setor C", "Setor D"],
+      corridors: 4,
+    },
+    {
+      id: "location-3",
+      name: "Galpão Logístico Sul",
+      type: "Galpão",
+      address: "Estrada Sul, 789",
+      zones: ["Área 1", "Área 2"],
+      corridors: 2,
+    },
+  ]
+
+  const allMachinesData = {
+    "Oficina Centro Automotiva": [
+      {
+        id: "machine-1",
+        name: "Bomba Centrífuga BC-2000",
+        type: "Bomba",
+        status: "maintenance",
+        corridor: 1,
+        position: { x: 1, y: 1 },
+        metrics: { efficiency: 86.8, performance: 94.3, quality: 98.3, availability: 92.0 },
+      },
+      {
+        id: "machine-2",
+        name: "Torno CNC T-3000",
+        type: "Torno",
+        status: "operating",
+        corridor: 2,
+        position: { x: 2, y: 2 },
+        metrics: { efficiency: 92.5, performance: 88.7, quality: 95.1, availability: 94.8 },
+      },
+    ],
+    "Fábrica Industrial Norte": [
+      {
+        id: "machine-3",
+        name: "Robô Industrial RI-X500",
+        type: "Robô",
+        status: "operating",
+        corridor: 1,
+        position: { x: 1, y: 1 },
+        metrics: { efficiency: 95.2, performance: 92.8, quality: 97.5, availability: 96.3 },
+      },
+      {
+        id: "machine-4",
+        name: "Prensa Hidráulica PH-1500",
+        type: "Prensa",
+        status: "operating",
+        corridor: 2,
+        position: { x: 2, y: 1 },
+        metrics: { efficiency: 88.4, performance: 91.2, quality: 93.7, availability: 89.5 },
+      },
+      {
+        id: "machine-5",
+        name: "Fresadora CNC F-800",
+        type: "Fresadora",
+        status: "waiting",
+        corridor: 3,
+        position: { x: 1, y: 2 },
+        metrics: { efficiency: 0, performance: 0, quality: 0, availability: 0 },
+      },
+      {
+        id: "machine-6",
+        name: "Centro de Usinagem CU-400",
+        type: "Centro",
+        status: "operating",
+        corridor: 4,
+        position: { x: 2, y: 2 },
+        metrics: { efficiency: 93.1, performance: 89.6, quality: 96.2, availability: 91.8 },
+      },
+    ],
+    "Galpão Logístico Sul": [
+      {
+        id: "machine-7",
+        name: "Empilhadeira Autônoma EA-200",
+        type: "Empilhadeira",
+        status: "operating",
+        corridor: 1,
+        position: { x: 1, y: 1 },
+        metrics: { efficiency: 91.3, performance: 87.9, quality: 94.6, availability: 93.2 },
+      },
+      {
+        id: "machine-8",
+        name: "Esteira Transportadora ET-500",
+        type: "Esteira",
+        status: "operating",
+        corridor: 2,
+        position: { x: 2, y: 1 },
+        metrics: { efficiency: 89.7, performance: 90.3, quality: 92.1, availability: 88.9 },
+      },
+    ],
+  }
+
+  const facility = locations.find((loc) => loc.name === selectedLocation) || locations[0]
+  const [machines, setMachines] = useState<any[]>(allMachinesData[selectedLocation] || [])
+
+  useEffect(() => {
+    setMachines(allMachinesData[selectedLocation] || [])
+    setSelectedMachine(null)
+    if (facility.zones && facility.zones.length > 0) {
+      setSelectedZone(facility.zones[0])
+    }
+  }, [selectedLocation])
 
   const totalMachines = machines.length
   const operatingMachines = machines.filter((m) => m.status === "operating").length
@@ -109,6 +203,17 @@ export default function WorkspacePage() {
             <h1 className="text-2xl font-bold text-foreground">Monitor de Máquinas</h1>
             <p className="text-sm text-muted-foreground">{facility?.name || "Configure seu ambiente de trabalho"}</p>
           </div>
+          <select
+            value={selectedLocation}
+            onChange={(e) => setSelectedLocation(e.target.value)}
+            className="px-4 py-2 bg-muted border border-border rounded-lg text-sm font-medium"
+          >
+            {locations.map((location) => (
+              <option key={location.id} value={location.name}>
+                {location.name}
+              </option>
+            ))}
+          </select>
           <select
             value={selectedZone}
             onChange={(e) => setSelectedZone(e.target.value)}
@@ -386,7 +491,6 @@ export default function WorkspacePage() {
                     ))}
                   </div>
                 </div>
-                {/* </CHANGE> */}
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="flex items-center gap-2">
@@ -455,7 +559,8 @@ export default function WorkspacePage() {
         open={setupModalOpen}
         onClose={() => setSetupModalOpen(false)}
         onSave={(data) => {
-          setFacility(data)
+          // Placeholder for saving facility data
+          console.log("Facility data saved:", data)
           setSetupModalOpen(false)
         }}
         existingData={facility}

@@ -97,7 +97,7 @@ export default function WorkspacePage() {
           </select>
         </div>
 
-        <div className="flex items-center gap-2 pl-28">
+        <div className="flex items-center gap-2">
           <Button
             variant={renderMode === "3d" ? "default" : "outline"}
             onClick={() => setRenderMode("3d")}

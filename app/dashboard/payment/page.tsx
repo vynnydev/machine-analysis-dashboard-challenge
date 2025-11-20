@@ -97,10 +97,12 @@ export default function PaymentPage() {
   })
 
   const handleAddCard = (newCard: CardType) => {
+    console.log("[v0] Adding new card:", newCard)
     setCards([...cards, newCard])
   }
 
   const handleSetDefault = (cardId: string) => {
+    console.log("[v0] Setting default card:", cardId)
     setCards(
       cards.map((card) => ({
         ...card,
@@ -110,6 +112,7 @@ export default function PaymentPage() {
   }
 
   const handleDeleteCard = (cardId: string) => {
+    console.log("[v0] Deleting card:", cardId)
     if (cards.length === 1) {
       alert("Você deve manter pelo menos um cartão cadastrado")
       return
@@ -405,7 +408,14 @@ export default function PaymentPage() {
                   <h3 className="text-lg font-semibold">Meus Cartões</h3>
                   <p className="text-sm text-muted-foreground">Gerencie seus métodos de pagamento</p>
                 </div>
-                <Button size="sm" onClick={() => setIsAddCardModalOpen(true)} className="gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    console.log("[v0] Add card button clicked")
+                    setIsAddCardModalOpen(true)
+                  }}
+                  className="gap-2"
+                >
                   <Plus className="w-4 h-4" />
                   Adicionar
                 </Button>
@@ -459,7 +469,10 @@ export default function PaymentPage() {
               <Button
                 variant="outline"
                 className="w-full mt-4 bg-transparent"
-                onClick={() => setIsAllCardsModalOpen(true)}
+                onClick={() => {
+                  console.log("[v0] View all cards button clicked")
+                  setIsAllCardsModalOpen(true)
+                }}
               >
                 Ver todos os cartões
               </Button>
@@ -468,15 +481,23 @@ export default function PaymentPage() {
         </div>
       </div>
 
+      {console.log("[v0] Modal states - AddCard:", isAddCardModalOpen, "AllCards:", isAllCardsModalOpen)}
+
       <AddCardModal
         isOpen={isAddCardModalOpen}
-        onClose={() => setIsAddCardModalOpen(false)}
+        onClose={() => {
+          console.log("[v0] Closing add card modal")
+          setIsAddCardModalOpen(false)
+        }}
         onAddCard={handleAddCard}
       />
 
       <AllCardsModal
         isOpen={isAllCardsModalOpen}
-        onClose={() => setIsAllCardsModalOpen(false)}
+        onClose={() => {
+          console.log("[v0] Closing all cards modal")
+          setIsAllCardsModalOpen(false)
+        }}
         cards={cards}
         onSetDefault={handleSetDefault}
         onDeleteCard={handleDeleteCard}

@@ -163,7 +163,7 @@ export default function WorkspacePage() {
             leftPanelState === "minimized" ? "w-16 h-16" : "w-72"
           }`}
         >
-          <div className="p-5">
+          <div className="px-5">
             {leftPanelState === "minimized" ? (
               <Button
                 variant="ghost"

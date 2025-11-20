@@ -87,7 +87,7 @@ export default function WorkspacePage() {
           <select
             value={selectedZone}
             onChange={(e) => setSelectedZone(e.target.value)}
-            className="px-4 py-2 bg-muted border border-border rounded-lg text-sm"
+            className="pl-20 py-2 bg-muted border border-border rounded-lg text-sm"
           >
             {facility?.zones?.map((zone: string) => (
               <option key={zone} value={zone}>

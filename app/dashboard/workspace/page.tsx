@@ -149,94 +149,163 @@ export default function WorkspacePage() {
       <div className="absolute top-16 left-0 right-0 bottom-0 pl-72">
         {/* Left Panel */}
         <Card
-          className={`absolute left-24 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 ${
-            leftPanelState === "minimized" ? "w-16 h-16" : leftPanelState === "semi" ? "w-80 h-40" : "w-80 h-auto"
+          className={`absolute left-24 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 rounded-2xl ${
+            leftPanelState === "minimized"
+              ? "w-16 h-16"
+              : leftPanelState === "semi"
+                ? "w-[520px] h-44"
+                : "w-[560px] h-auto"
           }`}
         >
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleLeftPanel}
-              className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background z-10"
-            >
-              {leftPanelState === "minimized" ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : leftPanelState === "semi" ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronUp className="h-4 w-4" />
-              )}
-            </Button>
-
+          <div className="relative h-full">
             {leftPanelState === "minimized" ? (
-              <div className="p-4 flex items-center justify-center">
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <div className="h-3 w-3 rounded-full bg-emerald-500" />
+              <div className="p-4 flex items-center justify-center h-full">
+                <div className="h-10 w-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
+                  <svg
+                    className="h-5 w-5 text-teal-500"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M3 13h4l3 8 4-16 3 8h4" />
+                  </svg>
                 </div>
               </div>
             ) : leftPanelState === "semi" ? (
-              <div className="p-6 space-y-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <div className="h-3 w-3 rounded-full bg-emerald-500" />
+              <div className="p-6 h-full flex flex-col">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="h-12 w-12 rounded-xl bg-teal-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="h-6 w-6 text-teal-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M3 13h4l3 8 4-16 3 8h4" />
+                    </svg>
                   </div>
-                  <span>Total de Equipamentos</span>
+                  <div className="flex-1 ml-4">
+                    <h3 className="text-base text-muted-foreground font-normal">Total de Equipamentos</h3>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleLeftPanel}
+                    className="h-8 w-8 rounded-full hover:bg-muted flex-shrink-0"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-bold text-foreground">{totalMachines}</span>
-                  <span className="text-sm text-muted-foreground">Equipamentos</span>
+                <div className="flex items-baseline gap-3 mt-2">
+                  <span className="text-6xl font-bold text-foreground leading-none">{totalMachines}</span>
+                  <span className="text-muted-foreground text-lg mb-1">Equipamentos</span>
                 </div>
               </div>
             ) : (
-              <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-                {/* Total Equipment */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <div className="h-3 w-3 rounded-full bg-emerald-500" />
+              <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+                {/* Header with icon, title and toggle */}
+                <div className="flex items-start justify-between mb-2">
+                  <div className="h-12 w-12 rounded-xl bg-teal-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="h-6 w-6 text-teal-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M3 13h4l3 8 4-16 3 8h4" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 ml-4">
+                    <h3 className="text-base text-muted-foreground font-normal">Total de Equipamentos</h3>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleLeftPanel}
+                    className="h-8 w-8 rounded-full hover:bg-muted flex-shrink-0"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Total count */}
+                <div className="flex items-baseline gap-3 pb-4">
+                  <span className="text-6xl font-bold text-foreground leading-none">{totalMachines}</span>
+                  <span className="text-muted-foreground text-lg mb-1">Equipamentos</span>
+                </div>
+
+                {/* Status items */}
+                <div className="space-y-4 pt-4 border-t border-border/50">
+                  {/* Operating */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
+                        <svg
+                          className="h-5 w-5 text-teal-500"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <circle cx="12" cy="12" r="3" />
+                          <path d="M12 1v6m0 6v6M1 12h6m6 0h6" />
+                        </svg>
+                      </div>
+                      <span className="text-base text-foreground">Operando</span>
                     </div>
-                    <span>Total de Equipamentos</span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-foreground">{operatingMachines}</span>
+                      <span className="text-muted-foreground text-sm">Equipamentos</span>
+                    </div>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-foreground">{totalMachines}</span>
-                    <span className="text-sm text-muted-foreground">Equipamentos</span>
-                  </div>
-                </div>
 
-                {/* Operating */}
-                <div className="flex items-center justify-between py-3 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span className="text-sm text-foreground">Operando</span>
+                  {/* In Maintenance */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                        <svg
+                          className="h-5 w-5 text-amber-500"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                      </div>
+                      <span className="text-base text-foreground">Em Manutenção</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-foreground">{maintenanceMachines}</span>
+                      <span className="text-muted-foreground text-sm">Equipamentos</span>
+                    </div>
                   </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold text-foreground">{operatingMachines}</span>
-                    <span className="text-xs text-muted-foreground">Equipamentos</span>
-                  </div>
-                </div>
 
-                {/* In Maintenance */}
-                <div className="flex items-center justify-between py-3 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span className="text-sm text-foreground">Em Manutenção</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold text-foreground">{maintenanceMachines}</span>
-                    <span className="text-xs text-muted-foreground">Equipamentos</span>
-                  </div>
-                </div>
-
-                {/* Waiting Maintenance */}
-                <div className="flex items-center justify-between py-3 border-t border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span className="text-sm text-foreground">Aguardando Manutenção</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold text-foreground">{waitingMachines}</span>
-                    <span className="text-xs text-muted-foreground">Equipamentos</span>
+                  {/* Waiting Maintenance */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                        <svg
+                          className="h-5 w-5 text-amber-500"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                        </svg>
+                      </div>
+                      <span className="text-base text-foreground">Aguardando Manutenção</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-amber-500">{waitingMachines}</span>
+                      <span className="text-muted-foreground text-sm">Equipamentos</span>
+                    </div>
                   </div>
                 </div>
               </div>

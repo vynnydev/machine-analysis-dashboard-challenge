@@ -142,13 +142,13 @@ export default function WorkspacePage() {
               variant="ghost"
               size="icon"
               onClick={() => setLeftPanelExpanded(!leftPanelExpanded)}
-              className="absolute left-24 right-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background"
+              className="absolute right-2 top-2 h-8 w-8 rounded-full bg-background/80 border border-border hover:bg-background"
             >
               {leftPanelExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
 
             {leftPanelExpanded ? (
-              <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="p-6 left-24 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
                 {/* Total Equipment */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">

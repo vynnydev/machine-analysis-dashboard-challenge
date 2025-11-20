@@ -2,7 +2,19 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, RefreshCw, ChevronUp, ChevronDown, X, Box, Layers } from "lucide-react"
+import {
+  Plus,
+  RefreshCw,
+  ChevronUp,
+  ChevronDown,
+  X,
+  Box,
+  Layers,
+  Activity,
+  Settings,
+  AlertCircle,
+  Wrench,
+} from "lucide-react"
 import { SetupFacilityModal } from "@/components/setup-facility-modal"
 import { AddMachineModal } from "@/components/add-machine-modal"
 import { WorkspaceViewer3D } from "@/components/workspace-viewer-3d"
@@ -153,162 +165,83 @@ export default function WorkspacePage() {
             leftPanelState === "minimized"
               ? "w-16 h-16"
               : leftPanelState === "semi"
-                ? "w-[520px] h-44"
-                : "w-[560px] h-[500px]"
+                ? "w-80 h-40"
+                : "w-80 h-auto max-h-[600px] overflow-y-auto"
           }`}
         >
-          <div className="relative h-full">
+          <div className="p-4">
             {leftPanelState === "minimized" ? (
-              <div className="p-4 flex items-center justify-center h-full">
-                <div className="h-10 w-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
-                  <svg
-                    className="h-5 w-5 text-teal-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M3 13h4l3 8 4-16 3 8h4" />
-                  </svg>
-                </div>
-              </div>
-            ) : leftPanelState === "semi" ? (
-              <div className="p-6 h-full flex flex-col">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-teal-500/20 flex items-center justify-center flex-shrink-0">
-                    <svg
-                      className="h-6 w-6 text-teal-500"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M3 13h4l3 8 4-16 3 8h4" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 ml-4">
-                    <h3 className="text-base text-muted-foreground font-normal">Total de Equipamentos</h3>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleLeftPanel}
-                    className="h-8 w-8 rounded-full hover:bg-muted flex-shrink-0"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex items-baseline gap-3 mt-2">
-                  <span className="text-6xl font-bold text-foreground leading-none">{totalMachines}</span>
-                  <span className="text-muted-foreground text-lg mb-1">Equipamentos</span>
-                </div>
+              <div className="flex items-center justify-center">
+                <Activity className="h-6 w-6 text-cyan-500" />
               </div>
             ) : (
-              <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-                {/* Header with icon, title and toggle */}
-                <div className="flex items-start justify-between mb-2">
-                  <div className="h-12 w-12 rounded-xl bg-teal-500/20 flex items-center justify-center flex-shrink-0">
-                    <svg
-                      className="h-6 w-6 text-teal-500"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M3 13h4l3 8 4-16 3 8h4" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 ml-4">
-                    <h3 className="text-base text-muted-foreground font-normal">Total de Equipamentos</h3>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleLeftPanel}
-                    className="h-8 w-8 rounded-full hover:bg-muted flex-shrink-0"
-                  >
-                    <ChevronUp className="h-4 w-4" />
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-foreground">Total de Equipamentos</h3>
+                  <Button variant="ghost" size="icon" onClick={toggleLeftPanel} className="h-6 w-6">
+                    {leftPanelState === "semi" ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronUp className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
 
-                {/* Total count */}
-                <div className="flex items-baseline gap-3 pb-4">
-                  <span className="text-6xl font-bold text-foreground leading-none">{totalMachines}</span>
-                  <span className="text-muted-foreground text-lg mb-1">Equipamentos</span>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                      <Activity className="h-5 w-5 text-cyan-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-foreground">{totalMachines}</p>
+                      <p className="text-xs text-muted-foreground">Equipamentos</p>
+                    </div>
+                  </div>
+
+                  {leftPanelState === "expanded" && (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                          <Settings className="h-5 w-5 text-green-500" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">Operando</p>
+                            <p className="text-xl font-bold text-foreground">{operatingMachines}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Equipamentos</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                          <AlertCircle className="h-5 w-5 text-amber-500" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">Em Manutenção</p>
+                            <p className="text-xl font-bold text-foreground">{maintenanceMachines}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Equipamentos</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                          <Wrench className="h-5 w-5 text-amber-500" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">Aguardando Manutenção</p>
+                            <p className="text-xl font-bold text-foreground">{waitingMachines}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Equipamentos</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-
-                {/* Status items */}
-                <div className="space-y-4 pt-4 border-t border-border/50">
-                  {/* Operating */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
-                        <svg
-                          className="h-5 w-5 text-teal-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <circle cx="12" cy="12" r="3" />
-                          <path d="M12 1v6m0 6v6M1 12h6m6 0h6" />
-                        </svg>
-                      </div>
-                      <span className="text-base text-foreground">Operando</span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-foreground">{operatingMachines}</span>
-                      <span className="text-muted-foreground text-sm">Equipamentos</span>
-                    </div>
-                  </div>
-
-                  {/* In Maintenance */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                        <svg
-                          className="h-5 w-5 text-amber-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="12" y1="8" x2="12" y2="12" />
-                          <line x1="12" y1="16" x2="12.01" y2="16" />
-                        </svg>
-                      </div>
-                      <span className="text-base text-foreground">Em Manutenção</span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-foreground">{maintenanceMachines}</span>
-                      <span className="text-muted-foreground text-sm">Equipamentos</span>
-                    </div>
-                  </div>
-
-                  {/* Waiting Maintenance */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                        <svg
-                          className="h-5 w-5 text-amber-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                        </svg>
-                      </div>
-                      <span className="text-base text-foreground">Aguardando Manutenção</span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-amber-500">{waitingMachines}</span>
-                      <span className="text-muted-foreground text-sm">Equipamentos</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              </>
             )}
           </div>
         </Card>

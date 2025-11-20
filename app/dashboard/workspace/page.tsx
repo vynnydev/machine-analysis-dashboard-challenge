@@ -175,7 +175,7 @@ export default function WorkspacePage() {
               </Button>
             ) : (
               <>
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
                       <Activity className="h-5 w-5 text-emerald-500" />

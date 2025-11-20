@@ -214,13 +214,7 @@ export default function WorkspacePage() {
           <Suspense
             fallback={<div className="flex items-center justify-center h-full">Carregando visualização 3D...</div>}
           >
-            <WorkspaceViewer3D
-              facility={facility}
-              machines={machines}
-              selectedZone={selectedZone}
-              onMachineClick={setSelectedMachine}
-              renderMode={renderMode}
-            />
+
           </Suspense>
 
           {/* Timeline */}

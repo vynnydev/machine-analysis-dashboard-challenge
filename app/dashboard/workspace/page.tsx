@@ -84,7 +84,17 @@ export default function WorkspacePage() {
             <h1 className="text-2xl font-bold text-foreground">Monitor de Máquinas</h1>
             <p className="text-sm text-muted-foreground">{facility?.name || "Configure seu ambiente de trabalho"}</p>
           </div>
-
+          <select
+            value={selectedZone}
+            onChange={(e) => setSelectedZone(e.target.value)}
+            className="pl-20 py-2 bg-muted border border-border rounded-lg text-sm"
+          >
+            {facility?.zones?.map((zone: string) => (
+              <option key={zone} value={zone}>
+                {zone}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center gap-2">

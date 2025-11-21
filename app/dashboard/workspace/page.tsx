@@ -371,17 +371,6 @@ export default function WorkspacePage() {
               </option>
             ))}
           </select>
-          <select
-            value={selectedZone}
-            onChange={(e) => setSelectedZone(e.target.value)}
-            className="px-4 py-2 bg-muted border border-border rounded-lg text-sm"
-          >
-            {facility?.zones?.map((zone: string) => (
-              <option key={zone} value={zone}>
-                {zone}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className="flex items-center gap-2">

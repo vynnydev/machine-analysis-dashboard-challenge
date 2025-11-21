@@ -12,34 +12,42 @@ function Forklift({ position = [0, 0, 0], rotation = 0, color = "#2563eb", movin
     if (forkRef.current && moving) {
       const time = state.clock.getElapsedTime()
       forkRef.current.position.z = position[2] + Math.sin(time * 0.5) * 2
+      forkRef.current.children[3].position.y = 0.3 + Math.sin(time * 1.5) * 0.2
+      forkRef.current.children[4].position.y = 0.3 + Math.sin(time * 1.5) * 0.2
     }
   })
 
   return (
-    <group ref={forkRef} position={position} rotation={[0, rotation, 0]} scale={0.4}>
-      {/* Body */}
+    <group ref={forkRef} position={position} rotation={[0, rotation, 0]} scale={0.5}>
+      {/* Body - more detailed */}
       <mesh position={[0, 0.4, 0]} castShadow>
         <boxGeometry args={[0.8, 0.6, 1.2]} />
-        <meshStandardMaterial color={color} metalness={0.6} roughness={0.4} />
+        <meshStandardMaterial color={color} metalness={0.7} roughness={0.3} />
       </mesh>
 
-      {/* Mast */}
-      <mesh position={[0, 1.2, -0.3]} castShadow>
-        <boxGeometry args={[0.15, 1.8, 0.15]} />
+      {/* Cabin */}
+      <mesh position={[0, 0.9, 0.2]} castShadow>
+        <boxGeometry args={[0.7, 0.5, 0.6]} />
+        <meshStandardMaterial color={color} metalness={0.5} roughness={0.4} transparent opacity={0.7} />
+      </mesh>
+
+      {/* Mast - taller and more detailed */}
+      <mesh position={[0, 1.5, -0.3]} castShadow>
+        <boxGeometry args={[0.15, 2.5, 0.15]} />
         <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.2} />
       </mesh>
 
-      {/* Forks */}
+      {/* Forks - animated */}
       <mesh position={[-0.2, 0.3, -0.8]} castShadow>
-        <boxGeometry args={[0.1, 0.1, 1]} />
+        <boxGeometry args={[0.1, 0.1, 1.2]} />
         <meshStandardMaterial color="#f59e0b" metalness={0.7} roughness={0.3} />
       </mesh>
       <mesh position={[0.2, 0.3, -0.8]} castShadow>
-        <boxGeometry args={[0.1, 0.1, 1]} />
+        <boxGeometry args={[0.1, 0.1, 1.2]} />
         <meshStandardMaterial color="#f59e0b" metalness={0.7} roughness={0.3} />
       </mesh>
 
-      {/* Wheels */}
+      {/* Wheels with rotation */}
       {[
         [-0.3, 0.15, 0.4],
         [0.3, 0.15, 0.4],
@@ -47,13 +55,31 @@ function Forklift({ position = [0, 0, 0], rotation = 0, color = "#2563eb", movin
         [0.3, 0.15, -0.4],
       ].map((pos, i) => (
         <mesh key={i} position={pos as [number, number, number]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-          <cylinderGeometry args={[0.15, 0.15, 0.15, 16]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.8} />
+          <cylinderGeometry args={[0.18, 0.18, 0.15, 16]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.8} metalness={0.2} />
         </mesh>
       ))}
 
-      {/* Lights */}
-      <pointLight position={[0, 0.8, -0.5]} intensity={0.3} distance={3} color="#fbbf24" />
+      {/* Headlights */}
+      <mesh position={[0.3, 0.5, -0.5]}>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshStandardMaterial color="#fff" emissive="#fbbf24" emissiveIntensity={3} />
+        <pointLight position={[0, 0, 0]} intensity={0.4} distance={4} color="#fbbf24" />
+      </mesh>
+      <mesh position={[-0.3, 0.5, -0.5]}>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshStandardMaterial color="#fff" emissive="#fbbf24" emissiveIntensity={3} />
+        <pointLight position={[0, 0, 0]} intensity={0.4} distance={4} color="#fbbf24" />
+      </mesh>
+
+      {/* Safety light on top */}
+      {moving && (
+        <mesh position={[0, 1.3, 0.2]}>
+          <sphereGeometry args={[0.08, 16, 16]} />
+          <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={4} />
+          <pointLight intensity={0.6} distance={3} color="#f97316" />
+        </mesh>
+      )}
     </group>
   )
 }
@@ -217,32 +243,40 @@ function RoboticArm({
 }
 
 function FactoryFloor({ corridors = 3, facilityType = "workshop" }: { corridors: number; facilityType?: string }) {
-  const floorSize = facilityType === "warehouse" ? 30 : 25
+  const floorSize = facilityType === "warehouse" ? 35 : 30
 
   return (
     <group>
-      {/* Large factory floor */}
+      {/* Large factory floor with texture */}
       <mesh position={[0, -0.05, 0]} receiveShadow>
         <boxGeometry args={[floorSize, 0.1, floorSize]} />
         <meshStandardMaterial color="#1e293b" metalness={0.4} roughness={0.8} />
       </mesh>
 
-      {/* Corridors with numbers */}
+      {/* Floor grid lines */}
+      {Array.from({ length: floorSize }).map((_, i) => (
+        <mesh key={`grid-x-${i}`} position={[-floorSize / 2 + i, 0.01, 0]} receiveShadow>
+          <boxGeometry args={[0.02, 0.01, floorSize]} />
+          <meshStandardMaterial color="#334155" transparent opacity={0.3} />
+        </mesh>
+      ))}
+
+      {/* Corridors with numbers and markings */}
       {Array.from({ length: corridors }).map((_, i) => {
-        const xPos = -8 + i * 5
+        const xPos = -10 + i * 6
         return (
           <group key={i} position={[xPos, 0, 0]}>
             {/* Corridor surface */}
             <mesh position={[0, 0, 0]} receiveShadow>
-              <boxGeometry args={[4, 0.15, 18]} />
+              <boxGeometry args={[5, 0.15, 20]} />
               <meshStandardMaterial color="#334155" metalness={0.3} roughness={0.7} />
             </mesh>
 
-            {/* Corridor number label */}
+            {/* Corridor number label - larger and more visible */}
             <Text
-              position={[0, 0.2, -9]}
+              position={[0, 0.2, -10]}
               rotation={[-Math.PI / 2, 0, 0]}
-              fontSize={0.8}
+              fontSize={1.2}
               color="#10b981"
               anchorX="center"
               anchorY="middle"
@@ -251,19 +285,38 @@ function FactoryFloor({ corridors = 3, facilityType = "workshop" }: { corridors:
               {i + 1}
             </Text>
 
-            {/* Aisle markers */}
-            {[-6, -3, 0, 3, 6].map((z, idx) => (
-              <mesh key={idx} position={[-1.8, 0.16, z]}>
-                <boxGeometry args={[0.3, 0.02, 0.3]} />
-                <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.5} />
-              </mesh>
+            {/* End position label */}
+            <Text
+              position={[0, 0.2, 10]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              fontSize={1.2}
+              color="#10b981"
+              anchorX="center"
+              anchorY="middle"
+              font="/fonts/Inter-Bold.ttf"
+            >
+              {i + 1}
+            </Text>
+
+            {/* Aisle safety markers */}
+            {[-8, -4, 0, 4, 8].map((z, idx) => (
+              <group key={idx}>
+                <mesh position={[-2.3, 0.16, z]}>
+                  <boxGeometry args={[0.4, 0.02, 0.4]} />
+                  <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} />
+                </mesh>
+                <mesh position={[2.3, 0.16, z]}>
+                  <boxGeometry args={[0.4, 0.02, 0.4]} />
+                  <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} />
+                </mesh>
+              </group>
             ))}
           </group>
         )
       })}
 
-      {/* Grid helper for reference */}
-      <gridHelper args={[floorSize, floorSize, "#475569", "#1e293b"]} />
+      {/* Enhanced grid helper */}
+      <gridHelper args={[floorSize, floorSize * 2, "#475569", "#1e293b"]} position={[0, 0.02, 0]} />
     </group>
   )
 }
@@ -316,6 +369,89 @@ function IndustrialMachine({ position = [0, 0, 0], type = "cnc", status = "opera
   )
 }
 
+function AssemblyLine({ position = [0, 0, 0], length = 8 }: any) {
+  const partRef = useRef<THREE.Mesh>(null)
+
+  useFrame((state) => {
+    if (partRef.current) {
+      const time = state.clock.getElapsedTime()
+      partRef.current.position.z = -length / 2 + ((time * 0.5) % length)
+    }
+  })
+
+  return (
+    <group position={position}>
+      {/* Conveyor belt */}
+      <ConveyorBelt position={[0, 0, 0]} length={length} active />
+
+      {/* Assembly stations */}
+      {[-length / 3, 0, length / 3].map((z, i) => (
+        <group key={i} position={[2, 0, z]}>
+          <RoboticArm position={[0, 0, 0]} rotation={-Math.PI / 2} color="#3b82f6" status="operating" />
+        </group>
+      ))}
+
+      {/* Moving part on conveyor */}
+      <mesh ref={partRef} position={[0, 0.5, 0]} castShadow>
+        <boxGeometry args={[0.4, 0.3, 0.4]} />
+        <meshStandardMaterial color="#64748b" metalness={0.6} roughness={0.4} />
+      </mesh>
+    </group>
+  )
+}
+
+function OverheadCrane({ position = [0, 0, 0], moving = false }: any) {
+  const craneRef = useRef<THREE.Group>(null)
+
+  useFrame((state) => {
+    if (craneRef.current && moving) {
+      const time = state.clock.getElapsedTime()
+      craneRef.current.position.x = position[0] + Math.sin(time * 0.3) * 3
+    }
+  })
+
+  return (
+    <group ref={craneRef} position={position}>
+      {/* Rails */}
+      <mesh position={[0, 5, -8]} castShadow>
+        <boxGeometry args={[0.2, 0.2, 16]} />
+        <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, 5, 8]} castShadow>
+        <boxGeometry args={[0.2, 0.2, 16]} />
+        <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.2} />
+      </mesh>
+
+      {/* Trolley */}
+      <mesh position={[0, 4.7, 0]} castShadow>
+        <boxGeometry args={[1.5, 0.3, 0.8]} />
+        <meshStandardMaterial color="#f59e0b" metalness={0.7} roughness={0.3} />
+      </mesh>
+
+      {/* Cables */}
+      <mesh position={[0, 2.5, 0]} castShadow>
+        <cylinderGeometry args={[0.03, 0.03, 4, 16]} />
+        <meshStandardMaterial color="#1e293b" metalness={0.9} roughness={0.1} />
+      </mesh>
+
+      {/* Hook */}
+      <mesh position={[0, 0.5, 0]} castShadow>
+        <torusGeometry args={[0.2, 0.05, 16, 32]} />
+        <meshStandardMaterial color="#fbbf24" metalness={0.8} roughness={0.2} />
+      </mesh>
+
+      {/* Warning light */}
+      {moving && (
+        <mesh position={[0, 5.2, 0]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={4} />
+          <pointLight intensity={0.8} distance={5} color="#f97316" />
+        </mesh>
+      )}
+    </group>
+  )
+}
+
 interface WorkspaceViewer3DProps {
   facility: any
   machines: any[]
@@ -338,61 +474,85 @@ export function WorkspaceViewer3D({
   return (
     <div className="w-full h-full">
       <Canvas shadows>
-        <PerspectiveCamera makeDefault position={[15, 15, 15]} />
+        <PerspectiveCamera makeDefault position={[20, 20, 20]} />
         <OrbitControls
           enableZoom={true}
           enablePan={true}
           maxPolarAngle={Math.PI / 2}
-          minDistance={10}
-          maxDistance={40}
+          minDistance={15}
+          maxDistance={50}
           target={[0, 0, 0]}
         />
-        <ambientLight intensity={0.5} />
+
+        <ambientLight intensity={0.6} />
+        <hemisphereLight intensity={0.4} groundColor="#1e293b" />
+
         <directionalLight
-          position={[15, 20, 15]}
-          intensity={1.2}
+          position={[20, 25, 15]}
+          intensity={1.5}
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-far={50}
-          shadow-camera-left={-20}
-          shadow-camera-right={20}
-          shadow-camera-top={20}
-          shadow-camera-bottom={-20}
+          shadow-mapSize-width={4096}
+          shadow-mapSize-height={4096}
+          shadow-camera-far={60}
+          shadow-camera-left={-25}
+          shadow-camera-right={25}
+          shadow-camera-top={25}
+          shadow-camera-bottom={-25}
         />
-        <spotLight position={[-15, 18, -10]} angle={0.3} penumbra={1} intensity={0.6} castShadow />
-        <spotLight position={[15, 18, 10]} angle={0.3} penumbra={1} intensity={0.6} castShadow />
-        <pointLight position={[0, 12, 0]} intensity={0.5} />
+
+        <spotLight position={[-18, 22, -12]} angle={0.4} penumbra={1} intensity={0.8} castShadow />
+        <spotLight position={[18, 22, 12]} angle={0.4} penumbra={1} intensity={0.8} castShadow />
+        <pointLight position={[0, 15, 0]} intensity={0.6} />
 
         <FactoryFloor corridors={facility?.corridors || 3} facilityType={facility?.type} />
 
         {facility?.type === "warehouse" && (
           <>
-            <StorageRack position={[-10, 0, -8]} withPallets />
-            <StorageRack position={[-10, 0, 0]} withPallets />
-            <StorageRack position={[-10, 0, 8]} withPallets />
-            <StorageRack position={[10, 0, -8]} withPallets />
-            <StorageRack position={[10, 0, 0]} withPallets />
-            <StorageRack position={[10, 0, 8]} withPallets />
+            {/* Storage racks in grid */}
+            {[-12, -4, 4, 12].map((x) =>
+              [-10, 0, 10].map((z) => <StorageRack key={`${x}-${z}`} position={[x, 0, z]} withPallets />),
+            )}
 
-            {/* Forklifts */}
-            <Forklift position={[-5, 0, -3]} rotation={0} color="#2563eb" moving />
-            <Forklift position={[5, 0, 3]} rotation={Math.PI} color="#10b981" />
+            {/* Multiple forklifts with different colors and movements */}
+            <Forklift position={[-8, 0, -5]} rotation={0} color="#2563eb" moving />
+            <Forklift position={[8, 0, 5]} rotation={Math.PI} color="#10b981" moving />
+            <Forklift position={[0, 0, -8]} rotation={Math.PI / 2} color="#f59e0b" />
+
+            {/* Overhead crane system */}
+            <OverheadCrane position={[0, 0, 0]} moving />
           </>
         )}
 
         {facility?.type === "factory" && (
           <>
-            <ConveyorBelt position={[-6, 0, 0]} length={8} active />
-            <ConveyorBelt position={[0, 0, 0]} length={8} active />
-            <ConveyorBelt position={[6, 0, 0]} length={8} active />
+            {/* Assembly lines */}
+            <AssemblyLine position={[-8, 0, 0]} length={12} />
+            <AssemblyLine position={[0, 0, 0]} length={12} />
+            <AssemblyLine position={[8, 0, 0]} length={12} />
+
+            {/* Quality control stations */}
+            {[-8, 0, 8].map((x, i) => (
+              <IndustrialMachine key={i} position={[x, 0, 8]} type="cnc" status="operating" />
+            ))}
+          </>
+        )}
+
+        {facility?.type === "workshop" && (
+          <>
+            {/* Workbenches */}
+            {[-8, 0, 8].map((x) => (
+              <mesh key={x} position={[x, 0.5, -8]} castShadow>
+                <boxGeometry args={[2, 0.8, 1]} />
+                <meshStandardMaterial color="#8b4513" roughness={0.9} />
+              </mesh>
+            ))}
           </>
         )}
 
         {machines.map((machine, idx) => {
-          const corridorWidth = 5
-          const x = -8 + (machine.corridor - 1) * corridorWidth + (machine.position.x - 1) * 1.5
-          const z = -7 + machine.position.y * 3
+          const corridorWidth = 6
+          const x = -10 + (machine.corridor - 1) * corridorWidth + (machine.position.x - 1) * 1.5
+          const z = -8 + machine.position.y * 4
 
           return (
             <group key={machine.id} onClick={() => onMachineClick(machine)}>

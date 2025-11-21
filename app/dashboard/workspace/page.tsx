@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Plus,
@@ -34,6 +34,11 @@ export default function WorkspacePage() {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
   const [facility, setFacility] = useState<any>({ name: "", type: "", corridors: 0, zones: [] })
   const [machines, setMachines] = useState<any[]>([])
+  const [selectedWing, setSelectedWing] = useState<string>("all")
+  const [timelineData, setTimelineData] = useState<any[]>([])
+  const [currentTimeIndex, setCurrentTimeIndex] = useState(2)
+  const [machineCardExpanded, setMachineCardExpanded] = useState(false)
+  const [showAutomatedTaskModal, setShowAutomatedTaskModal] = useState(false)
 
   const locations = [
     {
@@ -225,6 +230,45 @@ export default function WorkspacePage() {
     }
   }, [selectedLocation])
 
+  useEffect(() => {
+    const times = ["10:00", "10:15", "10:30", "10:45", "11:00", "11:15", "11:30", "11:45"]
+    const timeline = times.map((time, index) => ({
+      time,
+      machineCount: machines.length,
+      operating: machines.filter((m) => {
+        // Simulate historical data
+        if (index < currentTimeIndex - 1) return m.status === "operating"
+        if (index === currentTimeIndex - 1) return Math.random() > 0.3
+        if (index === currentTimeIndex) return m.status === "operating"
+        return Math.random() > 0.5
+      }).length,
+      maintenance: machines.filter((m) => m.status === "maintenance").length,
+    }))
+    setTimelineData(timeline)
+  }, [machines, currentTimeIndex])
+
+  const filteredMachines = useMemo(() => {
+    if (selectedWing === "all") return machines
+
+    const wingMappings: Record<string, number[]> = {
+      "Zone A1": [1],
+      "Zone A2": [2],
+      "Zone A3": [3],
+      "Zone T1": [1],
+      "Zone T2": [2],
+      "Zone T3": [3],
+      "Zone T4": [4],
+      "Ala Norte": [1],
+      "Ala Sul": [2],
+      "Ala Leste": [3],
+      "Ala Oeste": [4],
+      Centro: [5],
+    }
+
+    const corridors = wingMappings[selectedWing] || []
+    return machines.filter((m) => corridors.includes(m.corridor))
+  }, [machines, selectedWing])
+
   const totalMachines = machines.length
   const operatingMachines = machines.filter((m) => m.status === "operating").length
   const maintenanceMachines = machines.filter((m) => m.status === "maintenance").length
@@ -277,6 +321,24 @@ export default function WorkspacePage() {
     }
   }, [isFacilitySetup])
 
+  const handleTimelineClick = (index: number) => {
+    setCurrentTimeIndex(index)
+  }
+
+  const handleCreateAutomatedTask = (duration: number, action: string) => {
+    if (!selectedMachine) return
+
+    console.log("[v0] Creating automated task:", {
+      machine: selectedMachine.name,
+      action,
+      duration,
+    })
+
+    // Here you would integrate with the kanban board to create a new automated task
+    setShowAutomatedTaskModal(false)
+    setMachineCardExpanded(false)
+  }
+
   return (
     <div className="fixed inset-0 top-16 bg-background overflow-hidden">
       {/* Top Bar */}
@@ -294,6 +356,18 @@ export default function WorkspacePage() {
             {locations.map((location) => (
               <option key={location.id} value={location.name}>
                 {location.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedWing}
+            onChange={(e) => setSelectedWing(e.target.value)}
+            className="px-4 py-2 bg-muted border border-border rounded-lg text-sm font-medium"
+          >
+            <option value="all">Todas as Alas</option>
+            {facility?.zones?.map((zone: string) => (
+              <option key={zone} value={zone}>
+                {zone}
               </option>
             ))}
           </select>
@@ -427,90 +501,176 @@ export default function WorkspacePage() {
           >
             <WorkspaceViewer3D
               facility={facility}
-              machines={machines}
+              machines={filteredMachines}
               selectedZone={selectedZone}
-              onMachineClick={setSelectedMachine}
+              onMachineClick={(machine) => {
+                setSelectedMachine(machine)
+                setMachineCardExpanded(false)
+              }}
               renderMode={renderMode}
             />
           </Suspense>
 
-          {/* Timeline */}
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flex items-center gap-6 px-6 py-2 bg-background/80 backdrop-blur-sm rounded-full border border-border">
-            {["10:00", "10:15", "10:30", "10:45", "11:00", "11:15", "11:30", "11:45"].map((time, i) => (
-              <div key={time} className="flex flex-col items-center gap-1">
-                <div className={`h-2 w-2 rounded-full ${i === 2 ? "bg-emerald-500" : "bg-muted"}`} />
-                <span className="text-xs text-muted-foreground">{time}</span>
-              </div>
+            {timelineData.map((data, i) => (
+              <button
+                key={data.time}
+                onClick={() => handleTimelineClick(i)}
+                className={`flex flex-col items-center gap-1 transition-all hover:scale-110 ${
+                  i === currentTimeIndex ? "scale-110" : ""
+                }`}
+                title={`${data.time}: ${data.operating} operando, ${data.maintenance} em manutenção`}
+              >
+                <div
+                  className={`h-2 w-2 rounded-full transition-all ${
+                    i === currentTimeIndex
+                      ? "bg-emerald-500 ring-4 ring-emerald-500/20"
+                      : data.operating > data.maintenance
+                        ? "bg-emerald-500/50"
+                        : "bg-amber-500/50"
+                  }`}
+                />
+                <span
+                  className={`text-xs ${i === currentTimeIndex ? "text-foreground font-semibold" : "text-muted-foreground"}`}
+                >
+                  {data.time}
+                </span>
+              </button>
             ))}
           </div>
 
-          {/* Machine Detail Card (Bottom) */}
           {selectedMachine && (
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-[700px]">
               <Card className="p-6 bg-background/95 backdrop-blur-sm border-border">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold text-foreground">{selectedMachine.id}</h3>
-                      <Badge
-                        variant={selectedMachine.status === "operating" ? "default" : "secondary"}
-                        className={
-                          selectedMachine.status === "maintenance"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                            : ""
-                        }
-                      >
-                        {selectedMachine.status === "maintenance"
-                          ? "Em Manutenção"
-                          : selectedMachine.status === "operating"
-                            ? "Em Operação"
-                            : "Aguardando"}
-                      </Badge>
+                {!machineCardExpanded ? (
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold text-foreground">{selectedMachine.id}</h3>
+                        <Badge
+                          variant={selectedMachine.status === "operating" ? "default" : "secondary"}
+                          className={
+                            selectedMachine.status === "maintenance"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : ""
+                          }
+                        >
+                          {selectedMachine.status === "maintenance"
+                            ? "Em Manutenção"
+                            : selectedMachine.status === "operating"
+                              ? "Em Operação"
+                              : "Aguardando"}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setMachineCardExpanded(true)}
+                          className="ml-auto"
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{selectedMachine.name}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{selectedMachine.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Corredor {selectedMachine.corridor} - Posição: ({selectedMachine.position.x},{" "}
-                      {selectedMachine.position.y})
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 flex-1">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Eficiência:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.efficiency}%</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Desempenho:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.performance}%</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Qualidade:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.quality}%</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Disponibilidade:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.availability}%</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 ml-4">
-                    <Badge
-                      variant="outline"
-                      className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
-                    >
-                      Em Manutenção
-                    </Badge>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRemoveMachine(selectedMachine.id)}
-                      className="gap-2"
-                    >
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedMachine(null)} className="ml-4">
                       <X className="h-4 w-4" />
-                      Remover Máquina
                     </Button>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold text-foreground">{selectedMachine.name}</h3>
+                          <Badge variant={selectedMachine.status === "operating" ? "default" : "secondary"}>
+                            {selectedMachine.status === "maintenance" ? "Em Manutenção" : "Em Operação"}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Corredor {selectedMachine.corridor} - Posição: ({selectedMachine.position.x},{" "}
+                          {selectedMachine.position.y})
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setMachineCardExpanded(false)}>
+                          Minimizar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedMachine(null)
+                            setMachineCardExpanded(false)
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="border-t border-border pt-4">
+                      <h4 className="text-sm font-semibold mb-3">Atividade Automática</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCreateAutomatedTask(30, "Mover para manutenção")}
+                          className="gap-2"
+                        >
+                          <Activity className="h-4 w-4" />
+                          30 min
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCreateAutomatedTask(60, "Mover para manutenção")}
+                          className="gap-2"
+                        >
+                          <Activity className="h-4 w-4" />1 hora
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCreateAutomatedTask(120, "Mover para manutenção")}
+                          className="gap-2"
+                        >
+                          <Activity className="h-4 w-4" />2 horas
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Crie uma tarefa automática para movimentar esta máquina por um período determinado
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 border-t border-border pt-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Eficiência:</p>
+                        <p className="text-lg font-semibold text-cyan-500">{selectedMachine.efficiency}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Desempenho:</p>
+                        <p className="text-lg font-semibold text-cyan-500">{selectedMachine.performance}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Qualidade:</p>
+                        <p className="text-lg font-semibold text-cyan-500">{selectedMachine.quality}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Disponibilidade:</p>
+                        <p className="text-lg font-semibold text-cyan-500">{selectedMachine.availability}%</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleRemoveMachine(selectedMachine.id)}
+                        className="gap-2"
+                      >
+                        <X className="h-4 w-4" />
+                        Remover Máquina
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
           )}

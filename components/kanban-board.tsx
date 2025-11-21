@@ -12,7 +12,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MoreVertical, Plus, MessageSquare, Paperclip, Filter, ArrowUpDown, Users, Clock, Calendar, Tag, Star, FileText, AlertCircle, Search, ChevronDown, User, TrendingUp, X } from 'lucide-react'
+import {
+  MoreVertical,
+  Plus,
+  MessageSquare,
+  Users,
+  Clock,
+  Calendar,
+  Tag,
+  Star,
+  FileText,
+  AlertCircle,
+  Search,
+  ChevronDown,
+  TrendingUp,
+  Activity,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NewTaskModal } from "@/components/new-task-modal"
 
@@ -65,13 +80,15 @@ export function KanbanBoard() {
   const [selectedProject, setSelectedProject] = useState(availableProjects[0])
   const [showProjectList, setShowProjectList] = useState(false)
   const [newTaskModalOpen, setNewTaskModalOpen] = useState(false)
-  
+
   const [selectedPeriod, setSelectedPeriod] = useState<"30days" | "3months" | "6months">("30days")
   const [selectedPriority, setSelectedPriority] = useState<string>("all")
   const [selectedStage, setSelectedStage] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
-  
+
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null)
+
+  const [activeTab, setActiveTab] = useState<"manual" | "automated">("manual")
 
   const metrics = useMemo(() => {
     const baseMetrics = {
@@ -83,7 +100,7 @@ export function KanbanBoard() {
         hours: 1248,
         hoursDelta: "+15% vs período anterior",
         completion: 87,
-        completionDelta: "+3% vs período anterior"
+        completionDelta: "+3% vs período anterior",
       },
       "3months": {
         members: 28,
@@ -93,7 +110,7 @@ export function KanbanBoard() {
         hours: 3840,
         hoursDelta: "+22% vs trimestre anterior",
         completion: 84,
-        completionDelta: "+5% trimestre anterior"
+        completionDelta: "+5% trimestre anterior",
       },
       "6months": {
         members: 32,
@@ -103,8 +120,8 @@ export function KanbanBoard() {
         hours: 7520,
         hoursDelta: "+28% vs semestre anterior",
         completion: 82,
-        completionDelta: "+7% vs semestre anterior"
-      }
+        completionDelta: "+7% vs semestre anterior",
+      },
     }
     return baseMetrics[selectedPeriod]
   }, [selectedPeriod])
@@ -265,34 +282,34 @@ export function KanbanBoard() {
   ])
 
   const filteredColumns = useMemo(() => {
-    return columns.map(column => ({
+    return columns.map((column) => ({
       ...column,
-      tasks: column.tasks.filter(task => {
+      tasks: column.tasks.filter((task) => {
         // Filter by priority
         if (selectedPriority !== "all" && task.priority !== selectedPriority) {
           return false
         }
-        
+
         // Filter by stage (column)
         if (selectedStage !== "all" && column.id !== selectedStage) {
           return false
         }
-        
+
         // Filter by search query
         if (searchQuery.trim() !== "") {
           const query = searchQuery.toLowerCase()
           const matchesTitle = task.title.toLowerCase().includes(query)
           const matchesDescription = task.description?.toLowerCase().includes(query)
-          const matchesTags = task.tags.some(tag => tag.toLowerCase().includes(query))
+          const matchesTags = task.tags.some((tag) => tag.toLowerCase().includes(query))
           const matchesMachine = task.machine?.toLowerCase().includes(query)
-          
+
           if (!matchesTitle && !matchesDescription && !matchesTags && !matchesMachine) {
             return false
           }
         }
-        
+
         return true
-      })
+      }),
     }))
   }, [columns, selectedPriority, selectedStage, searchQuery])
 
@@ -359,17 +376,17 @@ export function KanbanBoard() {
 
   const getTagColor = (tag: string) => {
     const tagColors: Record<string, string> = {
-      "manutenção": "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-      "urgente": "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-      "automação": "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
-      "preventiva": "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-      "rotina": "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
-      "upgrade": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
-      "inspeção": "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-      "qualidade": "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
-      "teste": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-      "segurança": "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
-      "atualização": "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300",
+      manutenção: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+      urgente: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+      automação: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+      preventiva: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+      rotina: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
+      upgrade: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
+      inspeção: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+      qualidade: "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
+      teste: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+      segurança: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+      atualização: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300",
     }
     return tagColors[tag] || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
   }
@@ -382,7 +399,6 @@ export function KanbanBoard() {
     return name.slice(0, 2).toUpperCase()
   }
 
-
   return (
     <div className="space-y-6 mt-4">
       <div className="flex items-center gap-2">
@@ -391,9 +407,9 @@ export function KanbanBoard() {
           size="sm"
           onClick={() => setSelectedPeriod("30days")}
           className={cn(
-            selectedPeriod === "30days" 
-              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" 
-              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800"
+            selectedPeriod === "30days"
+              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800",
           )}
         >
           30 Dias
@@ -403,9 +419,9 @@ export function KanbanBoard() {
           size="sm"
           onClick={() => setSelectedPeriod("3months")}
           className={cn(
-            selectedPeriod === "3months" 
-              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" 
-              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800"
+            selectedPeriod === "3months"
+              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800",
           )}
         >
           3 Meses
@@ -415,9 +431,9 @@ export function KanbanBoard() {
           size="sm"
           onClick={() => setSelectedPeriod("6months")}
           className={cn(
-            selectedPeriod === "6months" 
-              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" 
-              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800"
+            selectedPeriod === "6months"
+              ? "bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+              : "dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 dark:hover:bg-gray-800",
           )}
         >
           6 Meses
@@ -425,7 +441,7 @@ export function KanbanBoard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card 
+        <Card
           className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => setSelectedMetric("members")}
         >
@@ -447,7 +463,7 @@ export function KanbanBoard() {
           </div>
         </Card>
 
-        <Card 
+        <Card
           className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => setSelectedMetric("projects")}
         >
@@ -469,7 +485,7 @@ export function KanbanBoard() {
           </div>
         </Card>
 
-        <Card 
+        <Card
           className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => setSelectedMetric("hours")}
         >
@@ -491,7 +507,7 @@ export function KanbanBoard() {
           </div>
         </Card>
 
-        <Card 
+        <Card
           className="p-4 bg-background dark:bg-gray-950 border-border dark:border-gray-800 cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => setSelectedMetric("completion")}
         >
@@ -514,216 +530,368 @@ export function KanbanBoard() {
         </Card>
       </div>
 
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-4">
-          {/* Project Selector */}
-          <div className="relative">
-            <Button
-              variant="outline"
-              className="gap-2 bg-background border-blue-500/30 hover:border-blue-500 dark:bg-gray-950 dark:border-blue-500/50 dark:hover:border-blue-400 dark:text-gray-100"
-              onClick={() => setShowProjectList(!showProjectList)}
-            >
-              <span className="text-sm text-muted-foreground dark:text-gray-400">Projeto:</span>
-              <span className="font-medium text-foreground dark:text-gray-100">{selectedProject.name}</span>
-              <ChevronDown className="h-4 w-4 ml-1" />
-            </Button>
-            
-            {showProjectList && (
-              <div className="absolute top-full left-0 mt-2 w-72 bg-background dark:bg-gray-950 border border-border dark:border-gray-800 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
-                <div className="p-2 border-b border-border dark:border-gray-800">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Buscar projeto..."
-                      className="w-full pl-8 pr-3 py-2 text-sm border border-border dark:border-gray-800 bg-background dark:bg-gray-900 text-foreground dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "manual" | "automated")} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="manual">Tarefas Manuais</TabsTrigger>
+          <TabsTrigger value="automated">Atividades Automáticas</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="manual" className="space-y-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-4">
+              {/* Project Selector */}
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  className="gap-2 bg-background border-blue-500/30 hover:border-blue-500 dark:bg-gray-950 dark:border-blue-500/50 dark:hover:border-blue-400 dark:text-gray-100"
+                  onClick={() => setShowProjectList(!showProjectList)}
+                >
+                  <span className="text-sm text-muted-foreground dark:text-gray-400">Projeto:</span>
+                  <span className="font-medium text-foreground dark:text-gray-100">{selectedProject.name}</span>
+                  <ChevronDown className="h-4 w-4 ml-1" />
+                </Button>
+
+                {showProjectList && (
+                  <div className="absolute top-full left-0 mt-2 w-72 bg-background dark:bg-gray-950 border border-border dark:border-gray-800 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                    <div className="p-2 border-b border-border dark:border-gray-800">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-gray-500" />
+                        <input
+                          type="text"
+                          placeholder="Buscar projeto..."
+                          className="w-full pl-8 pr-3 py-2 text-sm border border-border dark:border-gray-800 bg-background dark:bg-gray-900 text-foreground dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                    <div className="p-1">
+                      {availableProjects.map((project) => (
+                        <button
+                          key={project.id}
+                          onClick={() => {
+                            setSelectedProject(project)
+                            setShowProjectList(false)
+                          }}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted dark:hover:bg-gray-900 transition-colors text-foreground dark:text-gray-100",
+                            selectedProject.id === project.id && "bg-muted dark:bg-gray-900 font-medium",
+                          )}
+                        >
+                          {project.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center -space-x-2">
+                {teamMembers.slice(0, 3).map((member) => (
+                  <Avatar
+                    key={member.id}
+                    className="h-9 w-9 border-2 border-background dark:border-gray-950 hover:z-10 transition-transform hover:scale-110 cursor-pointer"
+                  >
+                    <AvatarImage src={member.avatar || "/placeholder.svg"} />
+                    <AvatarFallback className="text-xs font-semibold bg-gray-200 text-blue-600 dark:bg-gray-800 dark:text-blue-400">
+                      {getInitials(member.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                <div className="flex items-center justify-center h-9 w-9 rounded-full bg-muted dark:bg-gray-900 border-2 border-background dark:border-gray-950 text-xs font-semibold cursor-pointer hover:bg-muted/80 dark:hover:bg-gray-800 transition-colors text-foreground dark:text-gray-100">
+                  +{teamMembers.length - 3}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+                <SelectTrigger className="w-[180px] dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100">
+                  <SelectValue placeholder="Todas prioridades" />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-gray-950 dark:border-gray-800">
+                  <SelectItem value="all">Todas prioridades</SelectItem>
+                  <SelectItem value="high">Alta prioridade</SelectItem>
+                  <SelectItem value="medium">Média prioridade</SelectItem>
+                  <SelectItem value="low">Baixa prioridade</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedStage} onValueChange={setSelectedStage}>
+                <SelectTrigger className="w-[180px] dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100">
+                  <SelectValue placeholder="Todos estágios" />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-gray-950 dark:border-gray-800">
+                  <SelectItem value="all">Todos estágios</SelectItem>
+                  <SelectItem value="todo">A Fazer</SelectItem>
+                  <SelectItem value="in-progress">Em Progresso</SelectItem>
+                  <SelectItem value="review">Em Revisão</SelectItem>
+                  <SelectItem value="done">Concluído</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Buscar tarefas..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-3 py-2 text-sm border border-border dark:border-gray-800 bg-background dark:bg-gray-900 text-foreground dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              <Button
+                onClick={() => setNewTaskModalOpen(true)}
+                variant="default"
+                size="sm"
+                className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-500"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Tarefa
+              </Button>
+            </div>
+          </div>
+
+          <div className="w-full overflow-x-auto">
+            <div className="flex gap-4 pb-4 min-w-full">
+              {filteredColumns.map((column) => (
+                <div
+                  key={column.id}
+                  className="flex-1 min-w-[320px] rounded-lg p-4 bg-gray-100 dark:bg-gray-900/90 border border-gray-300 dark:border-gray-800"
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleDrop(column.id)}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{column.title}</h3>
+                      <Badge className="rounded-full bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500">
+                        {column.tasks.length}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-gray-200 dark:hover:bg-gray-800 dark:text-gray-100"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3 max-h-[calc(100vh-400px)] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                    {column.tasks.map((task) => (
+                      <Card
+                        key={task.id}
+                        draggable
+                        onDragStart={() => handleDragStart(task, column.id)}
+                        onClick={() => setSelectedTask(task)}
+                        className={cn(
+                          "p-3 border-l-4 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:shadow-lg dark:hover:shadow-gray-950/50 transition-all cursor-pointer",
+                          getPriorityBorderColor(task.priority),
+                          draggedTask?.task.id === task.id && "opacity-50",
+                        )}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex flex-wrap gap-1.5">
+                            {task.tags.map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className={cn("text-xs font-medium", getTagColor(tag))}
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 -mt-1 -mr-1 hover:bg-gray-100 dark:hover:bg-gray-900 dark:text-gray-100"
+                          >
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+
+                        <h4 className="font-medium text-sm mb-2 text-gray-900 dark:text-gray-100 line-clamp-2">
+                          {task.title}
+                        </h4>
+
+                        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-2">
+                          <div className="flex items-center gap-1.5">
+                            {task.assignees[0] && (
+                              <Avatar className="h-5 w-5">
+                                <AvatarImage src={task.assignees[0].avatar || "/placeholder.svg"} />
+                                <AvatarFallback className="text-[10px] font-semibold bg-gray-200 text-blue-600 dark:bg-gray-800 dark:text-blue-400">
+                                  {getInitials(task.assignees[0].name)}
+                                </AvatarFallback>
+                              </Avatar>
+                            )}
+                            <span className="truncate max-w-[100px]">{task.assignees[0]?.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>
+                              {new Date(task.dueDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-200 dark:border-gray-800 my-2" />
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600 dark:text-gray-400">Progresso</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{task.progress}%</span>
+                          </div>
+                          <Progress
+                            value={task.progress}
+                            className="h-1.5 bg-gray-200 dark:bg-gray-800"
+                            indicatorClassName={getProgressColor(task.progress)}
+                          />
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 </div>
-                <div className="p-1">
-                  {availableProjects.map((project) => (
-                    <button
-                      key={project.id}
-                      onClick={() => {
-                        setSelectedProject(project)
-                        setShowProjectList(false)
-                      }}
-                      className={cn(
-                        "w-full text-left px-3 py-2 text-sm rounded-md hover:bg-muted dark:hover:bg-gray-900 transition-colors text-foreground dark:text-gray-100",
-                        selectedProject.id === project.id && "bg-muted dark:bg-gray-900 font-medium"
-                      )}
-                    >
-                      {project.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center -space-x-2">
-            {teamMembers.slice(0, 3).map((member) => (
-              <Avatar key={member.id} className="h-9 w-9 border-2 border-background dark:border-gray-950 hover:z-10 transition-transform hover:scale-110 cursor-pointer">
-                <AvatarImage src={member.avatar || "/placeholder.svg"} />
-                <AvatarFallback className="text-xs font-semibold bg-gray-200 text-blue-600 dark:bg-gray-800 dark:text-blue-400">
-                  {getInitials(member.name)}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-            <div className="flex items-center justify-center h-9 w-9 rounded-full bg-muted dark:bg-gray-900 border-2 border-background dark:border-gray-950 text-xs font-semibold cursor-pointer hover:bg-muted/80 dark:hover:bg-gray-800 transition-colors text-foreground dark:text-gray-100">
-              +{teamMembers.length - 3}
+              ))}
             </div>
           </div>
-        </div>
+        </TabsContent>
 
-        <div className="flex items-center gap-2">
-          <Select value={selectedPriority} onValueChange={setSelectedPriority}>
-            <SelectTrigger className="w-[180px] dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100">
-              <SelectValue placeholder="Todas prioridades" />
-            </SelectTrigger>
-            <SelectContent className="dark:bg-gray-950 dark:border-gray-800">
-              <SelectItem value="all">Todas prioridades</SelectItem>
-              <SelectItem value="high">Alta prioridade</SelectItem>
-              <SelectItem value="medium">Média prioridade</SelectItem>
-              <SelectItem value="low">Baixa prioridade</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={selectedStage} onValueChange={setSelectedStage}>
-            <SelectTrigger className="w-[180px] dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100">
-              <SelectValue placeholder="Todos estágios" />
-            </SelectTrigger>
-            <SelectContent className="dark:bg-gray-950 dark:border-gray-800">
-              <SelectItem value="all">Todos estágios</SelectItem>
-              <SelectItem value="todo">A Fazer</SelectItem>
-              <SelectItem value="in-progress">Em Progresso</SelectItem>
-              <SelectItem value="review">Em Revisão</SelectItem>
-              <SelectItem value="done">Concluído</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-gray-500" />
-            <input
-              type="text"
-              placeholder="Buscar tarefas..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 py-2 text-sm border border-border dark:border-gray-800 bg-background dark:bg-gray-900 text-foreground dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          
-          <Button 
-            onClick={() => setNewTaskModalOpen(true)}
-            variant="default" size="sm" 
-            className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-500">
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Tarefa
-          </Button>
-        </div>
-      </div>
-
-      <div className="w-full overflow-x-auto">
-        <div className="flex gap-4 pb-4 min-w-full">
-          {filteredColumns.map((column) => (
-            <div
-              key={column.id}
-              className="flex-1 min-w-[320px] rounded-lg p-4 bg-gray-100 dark:bg-gray-900/90 border border-gray-300 dark:border-gray-800"
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(column.id)}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{column.title}</h3>
-                  <Badge className="rounded-full bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500">
-                    {column.tasks.length}
-                  </Badge>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-200 dark:hover:bg-gray-800 dark:text-gray-100">
-                  <Plus className="h-4 w-4" />
-                </Button>
+        <TabsContent value="automated" className="space-y-4">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Atividades Automáticas</h3>
+                <p className="text-sm text-muted-foreground">
+                  Tarefas programadas para execução automática em máquinas
+                </p>
               </div>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nova Atividade Automática
+              </Button>
+            </div>
 
-              <div className="space-y-3 max-h-[calc(100vh-400px)] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
-                {column.tasks.map((task) => (
-                  <Card
-                    key={task.id}
-                    draggable
-                    onDragStart={() => handleDragStart(task, column.id)}
-                    onClick={() => setSelectedTask(task)}
-                    className={cn(
-                      "p-3 border-l-4 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:shadow-lg dark:hover:shadow-gray-950/50 transition-all cursor-pointer",
-                      getPriorityBorderColor(task.priority),
-                      draggedTask?.task.id === task.id && "opacity-50",
-                    )}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex flex-wrap gap-1.5">
-                        {task.tags.map((tag) => (
-                          <Badge
-                            key={tag}
-                            variant="secondary"
-                            className={cn("text-xs font-medium", getTagColor(tag))}
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 -mt-1 -mr-1 hover:bg-gray-100 dark:hover:bg-gray-900 dark:text-gray-100">
-                        <MoreVertical className="h-3.5 w-3.5" />
-                      </Button>
+            <div className="space-y-3">
+              {/* Example automated tasks */}
+              <Card className="p-4 border-l-4 border-l-blue-500">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-foreground">Lubrificação Automática - CNC-950</h4>
+                      <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Ativa</Badge>
                     </div>
-
-                    <h4 className="font-medium text-sm mb-2 text-gray-900 dark:text-gray-100 line-clamp-2">{task.title}</h4>
-
-                    <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-2">
-                      <div className="flex items-center gap-1.5">
-                        {task.assignees[0] && (
-                          <Avatar className="h-5 w-5">
-                            <AvatarImage src={task.assignees[0].avatar || "/placeholder.svg"} />
-                            <AvatarFallback className="text-[10px] font-semibold bg-gray-200 text-blue-600 dark:bg-gray-800 dark:text-blue-400">
-                              {getInitials(task.assignees[0].name)}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <span className="truncate max-w-[100px]">{task.assignees[0]?.name}</span>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Sistema de lubrificação programado para executar a cada 4 horas
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        <span>Próxima execução: 14:30</span>
                       </div>
                       <div className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" />
+                        <span>Duração: 15 min</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Configurar
+                  </Button>
+                </div>
+              </Card>
+
+              <Card className="p-4 border-l-4 border-l-emerald-500">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-foreground">Movimentação Empilhadeira E-400</h4>
+                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        Em Execução
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Transferência automática de paletes do Corredor 1 para Corredor 3
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        <span>Iniciado: 11:15</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" />
+                        <span>Tempo restante: 45 min</span>
+                      </div>
+                    </div>
+                    <Progress value={35} className="mt-3 h-2" />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400"
+                  >
+                    Pausar
+                  </Button>
+                </div>
+              </Card>
+
+              <Card className="p-4 border-l-4 border-l-amber-500">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-semibold text-foreground">Inspeção Robô BR-700</h4>
+                      <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        Agendada
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Inspeção visual automática de componentes na linha de montagem
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        <span>{new Date(task.dueDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}</span>
+                        <span>Agendado para: 21/11/2025 08:00</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" />
+                        <span>Duração estimada: 2h</span>
                       </div>
                     </div>
-
-                    <div className="border-t border-gray-200 dark:border-gray-800 my-2" />
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-600 dark:text-gray-400">Progresso</span>
-                        <span className="font-medium text-gray-900 dark:text-gray-100">{task.progress}%</span>
-                      </div>
-                      <Progress
-                        value={task.progress}
-                        className="h-1.5 bg-gray-200 dark:bg-gray-800"
-                        indicatorClassName={getProgressColor(task.progress)}
-                      />
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Editar
+                  </Button>
+                </div>
+              </Card>
             </div>
-          ))}
-        </div>
-      </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!selectedMetric} onOpenChange={(open) => !open && setSelectedMetric(null)}>
         <DialogContent className="max-w-2xl bg-background dark:bg-gray-950 border-border dark:border-gray-800">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl font-bold text-foreground dark:text-gray-100 flex items-center gap-2">
-                {selectedMetric === "members" && <><Users className="h-5 w-5" /> Detalhes da Equipe</>}
-                {selectedMetric === "projects" && <><FileText className="h-5 w-5" /> Detalhes dos Projetos</>}
-                {selectedMetric === "hours" && <><Clock className="h-5 w-5" /> Detalhes das Horas</>}
-                {selectedMetric === "completion" && <><TrendingUp className="h-5 w-5" /> Detalhes da Conclusão</>}
+                {selectedMetric === "members" && (
+                  <>
+                    <Users className="h-5 w-5" /> Detalhes da Equipe
+                  </>
+                )}
+                {selectedMetric === "projects" && (
+                  <>
+                    <FileText className="h-5 w-5" /> Detalhes dos Projetos
+                  </>
+                )}
+                {selectedMetric === "hours" && (
+                  <>
+                    <Clock className="h-5 w-5" /> Detalhes das Horas
+                  </>
+                )}
+                {selectedMetric === "completion" && (
+                  <>
+                    <TrendingUp className="h-5 w-5" /> Detalhes da Conclusão
+                  </>
+                )}
               </DialogTitle>
             </div>
           </DialogHeader>
@@ -754,14 +922,18 @@ export function KanbanBoard() {
             {selectedMetric === "members" && (
               <div className="space-y-4">
                 <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Distribuição por Função</h4>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground dark:text-gray-400">Técnicos de Manutenção</span>
                       <span className="font-medium text-foreground dark:text-gray-100">8 Pessoas</span>
                     </div>
-                    <Progress value={33} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                    <Progress
+                      value={33}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-blue-500"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -769,7 +941,11 @@ export function KanbanBoard() {
                       <span className="text-muted-foreground dark:text-gray-400">Engenheiros</span>
                       <span className="font-medium text-foreground dark:text-gray-100">6 Pessoas</span>
                     </div>
-                    <Progress value={25} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-orange-500" />
+                    <Progress
+                      value={25}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-orange-500"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -777,7 +953,11 @@ export function KanbanBoard() {
                       <span className="text-muted-foreground dark:text-gray-400">Operadores</span>
                       <span className="font-medium text-foreground dark:text-gray-100">10 Pessoas</span>
                     </div>
-                    <Progress value={42} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-purple-500" />
+                    <Progress
+                      value={42}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-purple-500"
+                    />
                   </div>
                 </div>
               </div>
@@ -786,22 +966,32 @@ export function KanbanBoard() {
             {selectedMetric === "projects" && (
               <div className="space-y-4">
                 <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Distribuição por Status</h4>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground dark:text-gray-400">Concluídos</span>
                       <span className="font-medium text-foreground dark:text-gray-100">45 Projetos</span>
                     </div>
-                    <Progress value={66} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-green-500" />
+                    <Progress
+                      value={66}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-green-500"
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground dark:text-gray-400">Em Andamento</span>
-                      <span className="font-medium text-foreground dark:text-gray-100">{metrics.projects} Projetos</span>
+                      <span className="font-medium text-foreground dark:text-gray-100">
+                        {metrics.projects} Projetos
+                      </span>
                     </div>
-                    <Progress value={18} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                    <Progress
+                      value={18}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-blue-500"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -809,7 +999,11 @@ export function KanbanBoard() {
                       <span className="text-muted-foreground dark:text-gray-400">Planejados</span>
                       <span className="font-medium text-foreground dark:text-gray-100">11 Projetos</span>
                     </div>
-                    <Progress value={16} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-orange-500" />
+                    <Progress
+                      value={16}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-orange-500"
+                    />
                   </div>
                 </div>
               </div>
@@ -817,15 +1011,21 @@ export function KanbanBoard() {
 
             {selectedMetric === "hours" && (
               <div className="space-y-4">
-                <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Distribuição por Departamento</h4>
-                
+                <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">
+                  Distribuição por Departamento
+                </h4>
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground dark:text-gray-400">Manutenção Preventiva</span>
                       <span className="font-medium text-foreground dark:text-gray-100">520 Horas</span>
                     </div>
-                    <Progress value={42} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                    <Progress
+                      value={42}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-blue-500"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -833,7 +1033,11 @@ export function KanbanBoard() {
                       <span className="text-muted-foreground dark:text-gray-400">Manutenção Corretiva</span>
                       <span className="font-medium text-foreground dark:text-gray-100">428 Horas</span>
                     </div>
-                    <Progress value={34} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-orange-500" />
+                    <Progress
+                      value={34}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-orange-500"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -841,7 +1045,11 @@ export function KanbanBoard() {
                       <span className="text-muted-foreground dark:text-gray-400">Automação</span>
                       <span className="font-medium text-foreground dark:text-gray-100">300 Horas</span>
                     </div>
-                    <Progress value={24} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-purple-500" />
+                    <Progress
+                      value={24}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-purple-500"
+                    />
                   </div>
                 </div>
               </div>
@@ -850,14 +1058,18 @@ export function KanbanBoard() {
             {selectedMetric === "completion" && (
               <div className="space-y-4">
                 <h4 className="font-semibold text-sm text-foreground dark:text-gray-100">Detalhamento da Taxa</h4>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground dark:text-gray-400">Tarefas Concluídas no Prazo</span>
                       <span className="font-medium text-foreground dark:text-gray-100">92%</span>
                     </div>
-                    <Progress value={92} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-green-500" />
+                    <Progress
+                      value={92}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-green-500"
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -873,7 +1085,11 @@ export function KanbanBoard() {
                       <span className="text-muted-foreground dark:text-gray-400">Qualidade Média</span>
                       <span className="font-medium text-foreground dark:text-gray-100">94%</span>
                     </div>
-                    <Progress value={94} className="h-2 bg-gray-200 dark:bg-gray-800" indicatorClassName="bg-blue-500" />
+                    <Progress
+                      value={94}
+                      className="h-2 bg-gray-200 dark:bg-gray-800"
+                      indicatorClassName="bg-blue-500"
+                    />
                   </div>
                 </div>
               </div>
@@ -1090,7 +1306,9 @@ export function KanbanBoard() {
                         placeholder="Digite suas anotações sobre esta tarefa..."
                         className="min-h-[120px] bg-background border-border"
                       />
-                      <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">Salvar Anotação</Button>
+                      <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
+                        Salvar Anotação
+                      </Button>
                     </div>
                   </TabsContent>
 
@@ -1112,7 +1330,10 @@ export function KanbanBoard() {
                       </div>
 
                       <div className="space-y-2">
-                        <Textarea placeholder="Adicionar comentário..." className="min-h-[80px] bg-background border-border" />
+                        <Textarea
+                          placeholder="Adicionar comentário..."
+                          className="min-h-[80px] bg-background border-border"
+                        />
                         <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
                           <MessageSquare className="h-4 w-4 mr-2" />
                           Comentar

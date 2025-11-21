@@ -30,123 +30,198 @@ export default function WorkspacePage() {
   const [leftPanelState, setLeftPanelState] = useState<"minimized" | "semi" | "expanded">("semi")
   const [rightPanelState, setRightPanelState] = useState<"minimized" | "semi" | "expanded">("semi")
   const [renderMode, setRenderMode] = useState<"3d" | "svg">("3d")
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
+  const [facility, setFacility] = useState<any>({ name: "", type: "", corridors: 0, zones: [] })
+  const [machines, setMachines] = useState<any[]>([])
 
   const locations = [
     {
-      id: "location-1",
+      id: "oficina",
       name: "Oficina Centro Automotiva",
-      type: "Oficina",
-      address: "Rua das Indústrias, 123",
-      zones: ["Zone T1", "Zone T2", "Zone T3"],
+      type: "workshop",
       corridors: 3,
+      zones: ["Zone A1", "Zone A2", "Zone A3"],
+      machines: [
+        {
+          id: "m1",
+          name: "Braço Robótico BR-001",
+          type: "robotic_arm",
+          corridor: 1,
+          position: { x: 1, y: 1 },
+          status: "operating",
+          efficiency: 86.8,
+          performance: 94.3,
+          quality: 98.3,
+          availability: 92.0,
+        },
+        {
+          id: "m2",
+          name: "Torno CNC T-3000",
+          type: "cnc",
+          corridor: 2,
+          position: { x: 1, y: 2 },
+          status: "maintenance",
+          efficiency: 0,
+          performance: 0,
+          quality: 0,
+          availability: 0,
+        },
+        {
+          id: "m3",
+          name: "Empilhadeira E-200",
+          type: "forklift",
+          corridor: 3,
+          position: { x: 1, y: 1 },
+          status: "operating",
+          efficiency: 92.5,
+          performance: 88.7,
+          quality: 100,
+          availability: 95.0,
+        },
+      ],
     },
     {
-      id: "location-2",
-      name: "Fábrica Industrial Norte",
-      type: "Indústria",
-      address: "Av. Industrial, 456",
-      zones: ["Setor A", "Setor B", "Setor C", "Setor D"],
+      id: "fabrica",
+      name: "Fábrica Industrial",
+      type: "factory",
       corridors: 4,
+      zones: ["Zone T1", "Zone T2", "Zone T3", "Zone T4"],
+      machines: [
+        {
+          id: "f1",
+          name: "Linha de Montagem LM-01",
+          type: "industrial",
+          corridor: 1,
+          position: { x: 1, y: 1 },
+          status: "operating",
+          efficiency: 91.2,
+          performance: 95.8,
+          quality: 97.5,
+          availability: 94.0,
+        },
+        {
+          id: "f2",
+          name: "Braço Robótico BR-500",
+          type: "robotic_arm",
+          corridor: 2,
+          position: { x: 1, y: 2 },
+          status: "operating",
+          efficiency: 88.5,
+          performance: 92.1,
+          quality: 96.8,
+          availability: 91.5,
+        },
+        {
+          id: "f3",
+          name: "CNC Industrial CI-800",
+          type: "cnc",
+          corridor: 3,
+          position: { x: 1, y: 1 },
+          status: "operating",
+          efficiency: 85.0,
+          performance: 89.5,
+          quality: 99.2,
+          availability: 88.0,
+        },
+        {
+          id: "f4",
+          name: "Empilhadeira E-300",
+          type: "forklift",
+          corridor: 4,
+          position: { x: 1, y: 2 },
+          status: "operating",
+          efficiency: 90.0,
+          performance: 87.5,
+          quality: 100,
+          availability: 93.0,
+        },
+      ],
     },
     {
-      id: "location-3",
-      name: "Galpão Logístico Sul",
-      type: "Galpão",
-      address: "Estrada Sul, 789",
-      zones: ["Área 1", "Área 2"],
-      corridors: 2,
+      id: "galpao",
+      name: "Galpão Logístico",
+      type: "warehouse",
+      corridors: 5,
+      zones: ["Ala Norte", "Ala Sul", "Ala Leste", "Ala Oeste", "Centro"],
+      machines: [
+        {
+          id: "g1",
+          name: "Empilhadeira E-400",
+          type: "forklift",
+          corridor: 1,
+          position: { x: 1, y: 1 },
+          status: "operating",
+          efficiency: 93.5,
+          performance: 91.2,
+          quality: 100,
+          availability: 96.0,
+        },
+        {
+          id: "g2",
+          name: "Empilhadeira E-401",
+          type: "forklift",
+          corridor: 2,
+          position: { x: 1, y: 2 },
+          status: "operating",
+          efficiency: 91.0,
+          performance: 89.5,
+          quality: 100,
+          availability: 94.5,
+        },
+        {
+          id: "g3",
+          name: "Braço Robótico BR-700",
+          type: "robotic_arm",
+          corridor: 3,
+          position: { x: 1, y: 1 },
+          status: "operating",
+          efficiency: 87.5,
+          performance: 93.0,
+          quality: 98.0,
+          availability: 90.0,
+        },
+        {
+          id: "g4",
+          name: "Empilhadeira E-402",
+          type: "forklift",
+          corridor: 4,
+          position: { x: 1, y: 2 },
+          status: "maintenance",
+          efficiency: 0,
+          performance: 0,
+          quality: 0,
+          availability: 0,
+        },
+        {
+          id: "g5",
+          name: "Sistema Automatizado SA-100",
+          type: "industrial",
+          corridor: 5,
+          position: { x: 1, y: 1 },
+          status: "operating",
+          efficiency: 95.0,
+          performance: 96.5,
+          quality: 99.5,
+          availability: 97.0,
+        },
+      ],
     },
   ]
 
-  const allMachinesData = {
-    "Oficina Centro Automotiva": [
-      {
-        id: "machine-1",
-        name: "Bomba Centrífuga BC-2000",
-        type: "Bomba",
-        status: "maintenance",
-        corridor: 1,
-        position: { x: 1, y: 1 },
-        metrics: { efficiency: 86.8, performance: 94.3, quality: 98.3, availability: 92.0 },
-      },
-      {
-        id: "machine-2",
-        name: "Torno CNC T-3000",
-        type: "Torno",
-        status: "operating",
-        corridor: 2,
-        position: { x: 2, y: 2 },
-        metrics: { efficiency: 92.5, performance: 88.7, quality: 95.1, availability: 94.8 },
-      },
-    ],
-    "Fábrica Industrial Norte": [
-      {
-        id: "machine-3",
-        name: "Robô Industrial RI-X500",
-        type: "Robô",
-        status: "operating",
-        corridor: 1,
-        position: { x: 1, y: 1 },
-        metrics: { efficiency: 95.2, performance: 92.8, quality: 97.5, availability: 96.3 },
-      },
-      {
-        id: "machine-4",
-        name: "Prensa Hidráulica PH-1500",
-        type: "Prensa",
-        status: "operating",
-        corridor: 2,
-        position: { x: 2, y: 1 },
-        metrics: { efficiency: 88.4, performance: 91.2, quality: 93.7, availability: 89.5 },
-      },
-      {
-        id: "machine-5",
-        name: "Fresadora CNC F-800",
-        type: "Fresadora",
-        status: "waiting",
-        corridor: 3,
-        position: { x: 1, y: 2 },
-        metrics: { efficiency: 0, performance: 0, quality: 0, availability: 0 },
-      },
-      {
-        id: "machine-6",
-        name: "Centro de Usinagem CU-400",
-        type: "Centro",
-        status: "operating",
-        corridor: 4,
-        position: { x: 2, y: 2 },
-        metrics: { efficiency: 93.1, performance: 89.6, quality: 96.2, availability: 91.8 },
-      },
-    ],
-    "Galpão Logístico Sul": [
-      {
-        id: "machine-7",
-        name: "Empilhadeira Autônoma EA-200",
-        type: "Empilhadeira",
-        status: "operating",
-        corridor: 1,
-        position: { x: 1, y: 1 },
-        metrics: { efficiency: 91.3, performance: 87.9, quality: 94.6, availability: 93.2 },
-      },
-      {
-        id: "machine-8",
-        name: "Esteira Transportadora ET-500",
-        type: "Esteira",
-        status: "operating",
-        corridor: 2,
-        position: { x: 2, y: 1 },
-        metrics: { efficiency: 89.7, performance: 90.3, quality: 92.1, availability: 88.9 },
-      },
-    ],
-  }
-
-  const facility = locations.find((loc) => loc.name === selectedLocation) || locations[0]
-  const [machines, setMachines] = useState<any[]>(allMachinesData[selectedLocation] || [])
-
   useEffect(() => {
-    setMachines(allMachinesData[selectedLocation] || [])
-    setSelectedMachine(null)
-    if (facility.zones && facility.zones.length > 0) {
-      setSelectedZone(facility.zones[0])
+    const currentLocation = locations.find((loc) => loc.name === selectedLocation)
+    if (currentLocation) {
+      setFacility({
+        name: currentLocation.name,
+        type: currentLocation.type,
+        corridors: currentLocation.corridors,
+        zones: currentLocation.zones,
+      })
+      setMachines(currentLocation.machines)
+      if (currentLocation.zones.length > 0) {
+        setSelectedZone(currentLocation.zones[0])
+      }
     }
   }, [selectedLocation])
 
@@ -168,8 +243,16 @@ export default function WorkspacePage() {
     setSelectedMachine(null)
   }
 
-  const handleSyncAPI = () => {
-    console.log("[v0] Syncing with API...")
+  const handleSyncAPI = async () => {
+    setIsSyncing(true)
+    console.log("[v0] Syncing API data...")
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    setLastSyncTime(new Date())
+    setIsSyncing(false)
+    console.log("[v0] API sync completed")
   }
 
   const toggleLeftPanel = () => {
@@ -246,9 +329,9 @@ export default function WorkspacePage() {
             <Layers className="h-4 w-4" />
             SVG
           </Button>
-          <Button variant="outline" onClick={handleSyncAPI} className="gap-2 bg-transparent">
-            <RefreshCw className="h-4 w-4" />
-            Sincronizar API
+          <Button variant="outline" onClick={handleSyncAPI} className="gap-2 bg-transparent" disabled={isSyncing}>
+            <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+            {isSyncing ? "Sincronizando..." : "Sincronizar API"}
           </Button>
           <Button onClick={() => setAddMachineModalOpen(true)} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
             <Plus className="h-4 w-4" />
@@ -394,19 +477,19 @@ export default function WorkspacePage() {
                   <div className="grid grid-cols-2 gap-4 flex-1">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Eficiência:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.metrics.efficiency}%</p>
+                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.efficiency}%</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Desempenho:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.metrics.performance}%</p>
+                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.performance}%</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Qualidade:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.metrics.quality}%</p>
+                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.quality}%</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Disponibilidade:</p>
-                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.metrics.availability}%</p>
+                      <p className="text-lg font-semibold text-cyan-500">{selectedMachine.availability}%</p>
                     </div>
                   </div>
 

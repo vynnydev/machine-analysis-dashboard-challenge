@@ -295,7 +295,7 @@ export function Machines3DCardCarousel({ machines }: MachinesCarouselProps) {
   }
 
   return (
-    <div className="relative">
+    <div className="absolute">
       <Card className="shadow-lg border-2">
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center justify-between">

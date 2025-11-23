@@ -16,6 +16,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
@@ -32,6 +33,14 @@ export default function DashboardLayout({
     return () => document.removeEventListener("keydown", down)
   }, [])
 
+  React.useEffect(() => {
+    const handleCollapseSidebar = (e: CustomEvent) => {
+      setSidebarCollapsed(e.detail.collapsed)
+    }
+    window.addEventListener("collapseSidebar" as any, handleCollapseSidebar)
+    return () => window.removeEventListener("collapseSidebar" as any, handleCollapseSidebar)
+  }, [])
+
   return (
     <div className="min-h-screen bg-background flex">
       <Suspense fallback={null}>
@@ -40,7 +49,7 @@ export default function DashboardLayout({
           <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
 
-        <DashboardSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <DashboardSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} forceCollapsed={sidebarCollapsed} />
 
         <div className="flex-1 flex flex-col min-h-screen">
           {/* Header */}

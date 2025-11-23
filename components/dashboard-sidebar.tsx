@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   CreditCard,
   Settings,
@@ -28,11 +28,18 @@ import { AccountSwitcher } from "@/components/account-switcher"
 interface DashboardSidebarProps {
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
+  forceCollapsed?: boolean
 }
 
-export function DashboardSidebar({ sidebarOpen, setSidebarOpen }: DashboardSidebarProps) {
+export function DashboardSidebar({ sidebarOpen, setSidebarOpen, forceCollapsed }: DashboardSidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+
+  useEffect(() => {
+    if (forceCollapsed !== undefined) {
+      setCollapsed(forceCollapsed)
+    }
+  }, [forceCollapsed])
 
   const navigation = [
     {

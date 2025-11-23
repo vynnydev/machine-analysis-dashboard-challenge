@@ -339,6 +339,17 @@ export default function WorkspacePage() {
     setMachineCardExpanded(false)
   }
 
+  useEffect(() => {
+    const event = new CustomEvent("collapseSidebar", { detail: { collapsed: true } })
+    window.dispatchEvent(event)
+
+    // Cleanup: restore sidebar when leaving the page
+    return () => {
+      const restoreEvent = new CustomEvent("collapseSidebar", { detail: { collapsed: false } })
+      window.dispatchEvent(restoreEvent)
+    }
+  }, [])
+
   return (
     <div className="fixed inset-0 top-16 bg-background overflow-hidden">
       {/* Top Bar */}

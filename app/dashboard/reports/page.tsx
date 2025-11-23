@@ -310,6 +310,246 @@ export default function ReportsPage() {
     }
   }
 
+  const handleExportMachineReport = () => {
+    if (!selectedReport || !selectedMachine) return
+
+    const printWindow = window.open("", "_blank")
+    if (printWindow) {
+      const statusText =
+        selectedReport.status === "excellent"
+          ? "Excelente"
+          : selectedReport.status === "good"
+            ? "Bom"
+            : selectedReport.status === "warning"
+              ? "Atenção"
+              : "Crítico"
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Relatório ${selectedReport.id} - ${selectedMachine.name}</title>
+            <style>
+              body { 
+                font-family: Arial, sans-serif; 
+                padding: 40px; 
+                max-width: 900px; 
+                margin: 0 auto; 
+                color: #111827;
+              }
+              h1 { 
+                color: #1e40af; 
+                border-bottom: 3px solid #1e40af; 
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+              }
+              .header { 
+                display: flex; 
+                justify-content: space-between; 
+                margin-bottom: 30px;
+                padding: 20px;
+                background: #f3f4f6;
+                border-radius: 8px;
+              }
+              .header-section { flex: 1; }
+              .header-label { 
+                font-weight: bold; 
+                color: #374151; 
+                font-size: 12px;
+                text-transform: uppercase;
+                margin-bottom: 4px;
+              }
+              .header-value { 
+                font-size: 16px; 
+                color: #111827;
+                margin-bottom: 12px;
+              }
+              .metrics-grid { 
+                display: grid; 
+                grid-template-columns: repeat(4, 1fr); 
+                gap: 20px; 
+                margin: 30px 0; 
+              }
+              .metric-card { 
+                padding: 20px; 
+                background: #f9fafb; 
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+              }
+              .metric-label { 
+                font-weight: 600; 
+                color: #374151; 
+                font-size: 12px;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+              }
+              .metric-value { 
+                font-size: 28px; 
+                font-weight: bold;
+                color: #111827;
+                margin-bottom: 4px;
+              }
+              .metric-status { 
+                font-size: 12px; 
+                color: #059669;
+                font-weight: 500;
+              }
+              .health-score {
+                background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+                border: 2px solid #059669;
+              }
+              .health-score .metric-value { color: #059669; }
+              .analysis-section {
+                background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+                padding: 20px;
+                border-radius: 8px;
+                margin: 30px 0;
+                border: 2px solid #7c3aed;
+              }
+              .analysis-title {
+                font-weight: bold;
+                color: #7c3aed;
+                font-size: 16px;
+                margin-bottom: 15px;
+              }
+              .analysis-item {
+                display: flex;
+                align-items: start;
+                gap: 10px;
+                margin-bottom: 10px;
+                font-size: 14px;
+              }
+              .check-icon { color: #059669; font-weight: bold; }
+              .actions-section {
+                background: #fef3c7;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 30px 0;
+                border: 2px solid #f59e0b;
+              }
+              .actions-title {
+                font-weight: bold;
+                color: #f59e0b;
+                font-size: 16px;
+                margin-bottom: 15px;
+              }
+              .action-item {
+                display: flex;
+                align-items: start;
+                gap: 10px;
+                margin-bottom: 10px;
+                font-size: 14px;
+              }
+              .footer { 
+                margin-top: 50px; 
+                padding-top: 20px; 
+                border-top: 2px solid #e5e7eb; 
+                text-align: center; 
+                color: #6b7280;
+                font-size: 12px;
+              }
+              @media print {
+                body { padding: 20px; }
+                .header { break-inside: avoid; }
+                .metric-card { break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <h1>${selectedMachine.name}</h1>
+            
+            <div class="header">
+              <div class="header-section">
+                <div class="header-label">ID do Relatório</div>
+                <div class="header-value">${selectedReport.id}</div>
+                <div class="header-label">Status</div>
+                <div class="header-value">${statusText}</div>
+              </div>
+              <div class="header-section">
+                <div class="header-label">Data de Análise</div>
+                <div class="header-value">${selectedReport.date}</div>
+                <div class="header-label">Hora</div>
+                <div class="header-value">${selectedReport.time}</div>
+              </div>
+              <div class="header-section">
+                <div class="header-label">Gerado em</div>
+                <div class="header-value">${new Date().toLocaleString("pt-BR")}</div>
+              </div>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-card health-score">
+                <div class="metric-label">Saúde Geral</div>
+                <div class="metric-value">${selectedReport.healthScore}%</div>
+                <div class="metric-status">✓ ${statusText}</div>
+              </div>
+              
+              <div class="metric-card">
+                <div class="metric-label">Temperatura</div>
+                <div class="metric-value">72°C</div>
+                <div class="metric-status">✓ Normal</div>
+              </div>
+              
+              <div class="metric-card">
+                <div class="metric-label">Vibração</div>
+                <div class="metric-value">2.3 mm/s</div>
+                <div class="metric-status">✓ Dentro do limite</div>
+              </div>
+              
+              <div class="metric-card">
+                <div class="metric-label">Consumo</div>
+                <div class="metric-value">8.5 kW</div>
+                <div class="metric-status">✓ Eficiente</div>
+              </div>
+            </div>
+
+            <div class="analysis-section">
+              <div class="analysis-title">🧠 Análise IA</div>
+              <div class="analysis-item">
+                <span class="check-icon">✓</span>
+                <span>Todos os sistemas operacionais</span>
+              </div>
+              <div class="analysis-item">
+                <span class="check-icon">✓</span>
+                <span>Componentes críticos verificados</span>
+              </div>
+              <div class="analysis-item">
+                <span class="check-icon">✓</span>
+                <span>Operando em condições ideais</span>
+              </div>
+            </div>
+
+            <div class="actions-section">
+              <div class="actions-title">🔧 Próximas Ações</div>
+              <div class="action-item">
+                <span>•</span>
+                <span>Manutenção preventiva agendada para 30 Jan 2025</span>
+              </div>
+              <div class="action-item">
+                <span>•</span>
+                <span>Verificar nível de lubrificação semanalmente</span>
+              </div>
+              <div class="action-item">
+                <span>•</span>
+                <span>Monitorar temperatura durante operação contínua</span>
+              </div>
+            </div>
+
+            <div class="footer">
+              <p><strong>Cognitiva Analytics</strong> - Análise Preditiva</p>
+              <p>© ${new Date().getFullYear()} Todos os direitos reservados</p>
+            </div>
+          </body>
+        </html>
+      `)
+      printWindow.document.close()
+      printWindow.focus()
+      setTimeout(() => {
+        printWindow.print()
+      }, 250)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto p-8 space-y-6">
@@ -666,7 +906,7 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={handleExportMachineReport}>
                         <Download className="h-4 w-4 mr-2" />
                         Exportar PDF
                       </Button>

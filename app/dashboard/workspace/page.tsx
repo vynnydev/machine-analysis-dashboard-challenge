@@ -702,28 +702,33 @@ export default function WorkspacePage() {
                 </div>
 
                 <div className="mb-6">
-                  <div className="flex items-end justify-between h-32 gap-2">
+                  <div className="flex items-end justify-between h-40 gap-3 px-2">
                     {[
-                      { label: "Eficiência", value: 86.8, color: "bg-gradient-to-t from-emerald-400 to-emerald-600" },
+                      { label: "Eficiência", value: 86.8, color: "bg-gradient-to-t from-emerald-500 to-emerald-400" },
                       {
                         label: "Desempenho",
                         value: 94.3,
-                        color: "bg-gradient-to-t from-amber-400 to-amber-600",
+                        color: "bg-gradient-to-t from-amber-500 to-amber-400",
                       },
                       {
                         label: "Qualidade",
                         value: 98.3,
-                        color: "bg-gradient-to-t from-rose-400 to-rose-600",
+                        color: "bg-gradient-to-t from-rose-500 to-rose-400",
                       },
                       {
                         label: "Disponibilidade",
                         value: 92.0,
-                        color: "bg-gradient-to-t from-cyan-400 to-blue-600",
+                        color: "bg-gradient-to-t from-blue-500 to-cyan-400",
                       },
                     ].map((metric, i) => (
                       <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                        <div className={`w-full rounded-t-md ${metric.color}`} style={{ height: `${metric.value}%` }} />
-                        <p className="text-[10px] text-muted-foreground text-center">{metric.label}</p>
+                        <div className="relative w-full flex items-end" style={{ height: '128px' }}>
+                          <div 
+                            className={`w-full rounded-t-lg ${metric.color} transition-all duration-500 shadow-lg`} 
+                            style={{ height: `${metric.value}%` }} 
+                          />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground text-center font-medium">{metric.label}</p>
                       </div>
                     ))}
                   </div>

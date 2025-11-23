@@ -418,7 +418,7 @@ export default function WorkspacePage() {
       </div>
 
       {/* Main Content */}
-      <div className="absolute top-16 left-0 right-0 bottom-0 pl-72">
+      <div className="absolute top-16 left-0 right-0 bottom-0">
         {/* Left Panel */}
         <Card
           className={`absolute left-24 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 rounded-2xl ${

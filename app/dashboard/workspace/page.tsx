@@ -315,11 +315,11 @@ export default function WorkspacePage() {
 
   const isFacilitySetup = facility && facility.name
 
-  useEffect(() => {
+  {/* useEffect(() => {
     if (!isFacilitySetup) {
       setSetupModalOpen(true)
     }
-  }, [isFacilitySetup])
+  }, [isFacilitySetup]) */}
 
   const handleTimelineClick = (index: number) => {
     setCurrentTimeIndex(index)

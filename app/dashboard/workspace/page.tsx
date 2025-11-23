@@ -315,12 +315,6 @@ export default function WorkspacePage() {
 
   const isFacilitySetup = facility && facility.name
 
-  {/* useEffect(() => {
-    if (!isFacilitySetup) {
-      setSetupModalOpen(true)
-    }
-  }, [isFacilitySetup]) */}
-
   const handleTimelineClick = (index: number) => {
     setCurrentTimeIndex(index)
   }
@@ -710,21 +704,21 @@ export default function WorkspacePage() {
                 <div className="mb-6">
                   <div className="flex items-end justify-between h-32 gap-2">
                     {[
-                      { label: "Eficiência", value: 86.8, color: "bg-gradient-to-t from-emerald-500 to-emerald-400" },
+                      { label: "Eficiência", value: 86.8, color: "bg-gradient-to-t from-emerald-400 to-emerald-600" },
                       {
                         label: "Desempenho",
                         value: 94.3,
-                        color: "bg-gradient-to-t from-amber-500 to-amber-400",
+                        color: "bg-gradient-to-t from-amber-400 to-amber-600",
                       },
                       {
                         label: "Qualidade",
                         value: 98.3,
-                        color: "bg-gradient-to-t from-red-500 to-red-400",
+                        color: "bg-gradient-to-t from-rose-400 to-rose-600",
                       },
                       {
                         label: "Disponibilidade",
                         value: 92.0,
-                        color: "bg-gradient-to-t from-blue-500 to-blue-400",
+                        color: "bg-gradient-to-t from-cyan-400 to-blue-600",
                       },
                     ].map((metric, i) => (
                       <div key={i} className="flex-1 flex flex-col items-center gap-2">

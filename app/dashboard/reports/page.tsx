@@ -123,6 +123,9 @@ export default function ReportsPage() {
   const [reportIdSearch, setReportIdSearch] = useState("")
   const [activeTab, setActiveTab] = useState<"machine-analysis" | "metrics">("machine-analysis")
 
+  const [selectedMetricsReport, setSelectedMetricsReport] = useState<any>(null)
+  const [showMetricsReportModal, setShowMetricsReportModal] = useState(false)
+
   const currentMachines = machinesByLocation[selectedLocation] || []
 
   const currentReports = selectedMachine
@@ -244,6 +247,66 @@ export default function ReportsPage() {
         return "bg-green-600"
       default:
         return "bg-gray-600"
+    }
+  }
+
+  const handleViewMetricsReport = (report: any) => {
+    setSelectedMetricsReport(report)
+    setShowMetricsReportModal(true)
+  }
+
+  const handleDownloadMetricsReport = (report: any) => {
+    // Create a printable version
+    const printWindow = window.open("", "_blank")
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Relatório ${report.id} - ${report.title}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+              h1 { color: #1e40af; border-bottom: 3px solid #1e40af; padding-bottom: 10px; }
+              .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+              .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+              .info-item { padding: 15px; background: #f3f4f6; border-radius: 8px; }
+              .info-label { font-weight: bold; color: #374151; margin-bottom: 5px; }
+              .info-value { font-size: 18px; color: #111827; }
+              .summary { background: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0; }
+              .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; }
+              @media print {
+                body { padding: 20px; }
+              }
+            </style>
+          </head>
+          <body>
+            <h1>${report.title}</h1>
+            <div class="header">
+              <div>
+                <strong>ID do Relatório:</strong> ${report.id}<br>
+                <strong>Data:</strong> ${report.date}<br>
+                <strong>Hora:</strong> ${report.time}
+              </div>
+              <div>
+                <strong>Período:</strong> ${report.period}<br>
+                <strong>Gerado em:</strong> ${new Date().toLocaleString("pt-BR")}
+              </div>
+            </div>
+            <div class="summary">
+              <h3>Resumo</h3>
+              <p>${report.summary}</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Cognitiva Analytics - Análise Preditiva</p>
+            </div>
+          </body>
+        </html>
+      `)
+      printWindow.document.close()
+      printWindow.focus()
+      setTimeout(() => {
+        printWindow.print()
+      }, 250)
     }
   }
 
@@ -720,71 +783,221 @@ export default function ReportsPage() {
           </TabsContent>
 
           <TabsContent value="metrics" className="space-y-6">
+            {showMetricsReportModal && selectedMetricsReport && (
+              <>
+                <div
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                  onClick={() => setShowMetricsReportModal(false)}
+                />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                  <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <CardHeader className="border-b">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-lg ${getReportTypeColor(selectedMetricsReport.type)}`}>
+                            {getReportTypeIcon(selectedMetricsReport.type)}
+                          </div>
+                          <div>
+                            <CardTitle className="text-2xl">{selectedMetricsReport.title}</CardTitle>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {selectedMetricsReport.id} • {selectedMetricsReport.date} às {selectedMetricsReport.time}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadMetricsReport(selectedMetricsReport)}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Imprimir
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setShowMetricsReportModal(false)}>
+                            <X className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="text-sm text-muted-foreground mb-1">Período Analisado</div>
+                          <div className="text-xl font-semibold">{selectedMetricsReport.period}</div>
+                        </div>
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="text-sm text-muted-foreground mb-1">Data de Geração</div>
+                          <div className="text-xl font-semibold">{selectedMetricsReport.date}</div>
+                        </div>
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="text-sm text-muted-foreground mb-1">Horário</div>
+                          <div className="text-xl font-semibold">{selectedMetricsReport.time}</div>
+                        </div>
+                      </div>
+
+                      <div className="border-l-4 border-blue-600 bg-blue-50 dark:bg-blue-950 p-4 rounded">
+                        <h3 className="font-semibold mb-2 flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-blue-600" />
+                          Resumo do Relatório
+                        </h3>
+                        <p className="text-sm leading-relaxed">{selectedMetricsReport.summary}</p>
+                      </div>
+
+                      {selectedMetricsReport.type === "tasks" && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Detalhes de Tarefas e Máquinas</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-blue-600">24</div>
+                                <div className="text-sm text-muted-foreground">Máquinas Monitoradas</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-green-600">87%</div>
+                                <div className="text-sm text-muted-foreground">Taxa de Operação</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-purple-600">145</div>
+                                <div className="text-sm text-muted-foreground">Tarefas Concluídas</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-orange-600">12</div>
+                                <div className="text-sm text-muted-foreground">Tarefas Pendentes</div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedMetricsReport.type === "team" && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Detalhes de Equipe e Performance</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-blue-600">51</div>
+                                <div className="text-sm text-muted-foreground">Funcionários Ativos</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-green-600">68%</div>
+                                <div className="text-sm text-muted-foreground">Taxa de Presença</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-purple-600">387</div>
+                                <div className="text-sm text-muted-foreground">Candidatos a Vagas</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-orange-600">92%</div>
+                                <div className="text-sm text-muted-foreground">Satisfação da Equipe</div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedMetricsReport.type === "inventory" && (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold">Detalhes de Inventário e Equipamentos</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-blue-600">6</div>
+                                <div className="text-sm text-muted-foreground">Equipamentos Totais</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-green-600">3</div>
+                                <div className="text-sm text-muted-foreground">Operacionais</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-orange-600">1</div>
+                                <div className="text-sm text-muted-foreground">Em Manutenção</div>
+                              </CardContent>
+                            </Card>
+                            <Card>
+                              <CardContent className="p-4">
+                                <div className="text-3xl font-bold text-purple-600">2</div>
+                                <div className="text-sm text-muted-foreground">Aguardando Reparo</div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-2xl flex items-center gap-2">
-                    <Sparkles className="h-6 w-6 text-purple-600" />
-                    Relatórios de Métricas Gerados
-                  </CardTitle>
-                  <Badge variant="secondary" className="text-sm">
-                    {generatedMetricsReports.length} relatórios disponíveis
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground mt-2">
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-purple-600" />
+                  Relatórios de Métricas Gerados
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-2">
                   Relatórios gerados automaticamente das páginas de Tarefas, Equipe e Inventário
                 </p>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {generatedMetricsReports.map((report) => (
-                    <Card
-                      key={report.id}
-                      className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] border-2"
-                    >
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-3 rounded-lg ${getReportTypeColor(report.type)} text-white`}>
-                              {getReportTypeIcon(report.type)}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-lg">{report.title}</p>
-                              <Badge variant="outline" className="mt-1">
-                                {report.id}
-                              </Badge>
-                            </div>
+                    <Card key={report.id} className="hover:shadow-md transition-all">
+                      <CardContent className="p-6 space-y-4">
+                        <div className="flex items-start gap-4">
+                          <div className={`p-3 rounded-lg ${getReportTypeColor(report.type)}`}>
+                            {getReportTypeIcon(report.type)}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{report.title}</h3>
+                            <Badge variant="outline" className="mt-1 font-mono text-xs">
+                              {report.id}
+                            </Badge>
                           </div>
                         </div>
 
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {report.date}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {report.time}
-                            </span>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>{report.date}</span>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span>{report.time}</span>
+                          </div>
+                        </div>
 
-                          <Badge
-                            variant="secondary"
-                            className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          Período: {report.period}
+                        </Badge>
+
+                        <p className="text-sm text-muted-foreground leading-relaxed">{report.summary}</p>
+
+                        <div className="flex items-center gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            className="flex-1 bg-transparent"
+                            onClick={() => handleViewMetricsReport(report)}
                           >
-                            Período: {report.period}
-                          </Badge>
-
-                          <p className="text-sm text-muted-foreground line-clamp-2">{report.summary}</p>
-                        </div>
-
-                        <div className="flex gap-2 mt-4">
-                          <Button size="sm" className="flex-1 bg-transparent" variant="outline">
                             <FileText className="h-4 w-4 mr-2" />
                             Visualizar
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button variant="outline" size="icon" onClick={() => handleDownloadMetricsReport(report)}>
                             <Download className="h-4 w-4" />
                           </Button>
                         </div>
@@ -793,12 +1006,10 @@ export default function ReportsPage() {
                   ))}
                 </div>
 
-                {generatedMetricsReports.length === 0 && (
-                  <div className="text-center py-12">
-                    <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                    <p className="text-lg font-medium">Nenhum relatório gerado ainda</p>
-                    <p className="text-muted-foreground mt-1">
-                      Gere relatórios nas páginas de Tarefas, Equipe ou Inventário
+                {generatedMetricsReports.length > 0 && (
+                  <div className="mt-6 flex justify-end">
+                    <p className="text-sm text-muted-foreground">
+                      {generatedMetricsReports.length} relatórios disponíveis
                     </p>
                   </div>
                 )}

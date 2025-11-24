@@ -27,7 +27,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Preferências do Usuário</h1>
+        <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">Preferências do Usuário</h1>
         <p className="text-muted-foreground mt-1">Gerencie suas informações pessoais e configurações da conta</p>
       </div>
 

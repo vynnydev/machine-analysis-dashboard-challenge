@@ -432,7 +432,7 @@ export default function TasksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Quadro de Tarefas</h1>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">Quadro de Tarefas</h1>
           <p className="text-muted-foreground mt-1">Gerencie tarefas de automação e manutenção de equipamentos</p>
         </div>
         <div className="flex gap-2">

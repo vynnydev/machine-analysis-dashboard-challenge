@@ -555,7 +555,7 @@ export default function ReportsPage() {
       <div className="container mx-auto p-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+            <h1 className="text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">
               Relatórios de Análise
             </h1>
             <p className="text-lg text-muted-foreground">Histórico completo de análises e diagnósticos preditivos</p>

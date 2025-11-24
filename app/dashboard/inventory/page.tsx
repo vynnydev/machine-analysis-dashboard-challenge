@@ -167,7 +167,7 @@ export default function InventoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Inventário de Equipamentos</h1>
+        <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">Inventário de Equipamentos</h1>
         <p className="text-muted-foreground mt-1">Gerencie e acompanhe todos os equipamentos do seu local</p>
       </div>
 

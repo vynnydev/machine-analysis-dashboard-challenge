@@ -278,7 +278,7 @@ export default function WorkshopsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Oficina Virtual</h1>
+          <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">Oficina Virtual</h1>
           <p className="text-muted-foreground mt-1">Visualize suas máquinas e peças em 3D interativo</p>
         </div>
         <Button className="gap-2">

@@ -46,6 +46,7 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
   const [routeCoordinates, setRouteCoordinates] = useState<Array<[number, number]>>([])
   const [isLoadingRoute, setIsLoadingRoute] = useState(false)
   const [zoom, setZoom] = useState(12)
+  const [mapLoaded, setMapLoaded] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const markersRef = useRef<mapboxgl.Marker[]>([])
@@ -141,7 +142,6 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
   const mapStyle =
     mounted && resolvedTheme === "light" ? "mapbox://styles/mapbox/streets-v12" : "mapbox://styles/mapbox/dark-v11"
 
-  // Initialize Mapbox map
   useEffect(() => {
     if (!isOpen || !mapContainerRef.current || !mounted || !mapboxgl.accessToken) return
 
@@ -151,85 +151,91 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
       markersRef.current = []
     }
 
-    mapRef.current = new mapboxgl.Map({
+    setMapLoaded(false)
+
+    const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: mapStyle,
       center: userLocation,
       zoom: zoom,
     })
 
-    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right")
+    mapRef.current = map
 
-    // Add user location marker
-    const userEl = document.createElement("div")
-    userEl.innerHTML = `
-      <div style="
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #3b82f6, #60a5fa);
-        border-radius: 50%;
-        border: 4px solid white;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: pulse 2s infinite;
-      ">
-        <div style="width: 12px; height: 12px; background: white; border-radius: 50%;"></div>
-      </div>
-    `
-    new mapboxgl.Marker(userEl).setLngLat(userLocation).addTo(mapRef.current)
+    map.addControl(new mapboxgl.NavigationControl(), "top-right")
 
-    // Add vendor markers
-    vendors.forEach((vendor) => {
-      const el = document.createElement("div")
-      el.innerHTML = `
+    map.on("load", () => {
+      setMapLoaded(true)
+
+      const userEl = document.createElement("div")
+      userEl.className = "user-marker"
+      userEl.innerHTML = `
         <div style="
-          width: 44px;
-          height: 44px;
-          background: #f97316;
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #3b82f6, #60a5fa);
           border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+          border: 4px solid white;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
           display: flex;
           align-items: center;
           justify-content: center;
-          cursor: pointer;
-          transition: transform 0.2s;
-          font-weight: bold;
-          color: #fff;
-          font-size: 16px;
         ">
-          ₵
+          <div style="width: 12px; height: 12px; background: white; border-radius: 50%;"></div>
         </div>
       `
-      el.style.cursor = "pointer"
-      el.addEventListener("click", () => handleVendorSelect(vendor))
-      el.addEventListener("mouseenter", () => {
-        el.firstElementChild?.setAttribute(
-          "style",
-          (el.firstElementChild?.getAttribute("style") || "") + "transform: scale(1.1);",
-        )
-      })
-      el.addEventListener("mouseleave", () => {
-        el.firstElementChild?.setAttribute(
-          "style",
-          (el.firstElementChild?.getAttribute("style") || "").replace("transform: scale(1.1);", ""),
-        )
-      })
+      new mapboxgl.Marker(userEl).setLngLat(userLocation).addTo(map)
 
-      const marker = new mapboxgl.Marker(el).setLngLat(vendor.coordinates).addTo(mapRef.current!)
-      markersRef.current.push(marker)
+      vendors.forEach((vendor) => {
+        const el = document.createElement("div")
+        el.className = "vendor-marker"
+        el.innerHTML = `
+          <div class="vendor-marker-inner" style="
+            width: 44px;
+            height: 44px;
+            background: #f97316;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: bold;
+            color: #fff;
+            font-size: 16px;
+          ">
+            ₵
+          </div>
+        `
+        el.style.cursor = "pointer"
+
+        el.onclick = () => handleVendorSelect(vendor)
+        el.onmouseenter = () => {
+          const inner = el.querySelector(".vendor-marker-inner") as HTMLElement
+          if (inner) inner.style.transform = "scale(1.1)"
+        }
+        el.onmouseleave = () => {
+          const inner = el.querySelector(".vendor-marker-inner") as HTMLElement
+          if (inner) inner.style.transform = "scale(1)"
+        }
+
+        const marker = new mapboxgl.Marker(el).setLngLat(vendor.coordinates).addTo(map)
+        markersRef.current.push(marker)
+      })
     })
 
     return () => {
-      mapRef.current?.remove()
-      mapRef.current = null
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
       markersRef.current = []
+      setMapLoaded(false)
     }
   }, [isOpen, mapStyle, mounted])
 
-  // Draw route when selected vendor changes
   useEffect(() => {
     if (!mapRef.current || !selectedVendor || routeCoordinates.length === 0) return
 
@@ -308,12 +314,13 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
 
   if (!isOpen) return null
 
+  if (!mounted || typeof window === "undefined") return null
+
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative w-[95vw] max-w-7xl h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex">
-        {/* Left Panel - Vendor List */}
         <div className="w-[400px] bg-white dark:bg-slate-800/50 border-r border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden">
           <div className="p-6 border-b border-gray-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
@@ -404,7 +411,6 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
           </div>
         </div>
 
-        {/* Right Panel - Map */}
         <div className="flex-1 relative">
           <Button
             variant="ghost"
@@ -503,9 +509,5 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
     </div>
   )
 
-  if (typeof window !== "undefined") {
-    return createPortal(modalContent, document.body)
-  }
-
-  return null
+  return createPortal(modalContent, document.body)
 }

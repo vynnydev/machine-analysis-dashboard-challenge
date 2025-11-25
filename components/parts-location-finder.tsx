@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Navigation, Clock, Star, X, Sparkles, ZoomIn, ZoomOut, ChevronUp } from "lucide-react"
 import { generateRouteGeometry } from "@/app/actions/map-actions"
-import { getMapboxToken } from "@/app/actions/mapbox-token"
 import { createPortal } from "react-dom"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
@@ -42,7 +41,6 @@ interface PartsLocationFinderProps {
 export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: PartsLocationFinderProps) {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [tokenLoaded, setTokenLoaded] = useState(false)
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null)
   const [showVendorCard, setShowVendorCard] = useState(false)
   const [routeCoordinates, setRouteCoordinates] = useState<Array<[number, number]>>([])
@@ -135,13 +133,9 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
 
   useEffect(() => {
     setMounted(true)
-    // Fetch token from server action
-    getMapboxToken().then((token) => {
-      if (token) {
-        mapboxgl.accessToken = token
-        setTokenLoaded(true)
-      }
-    })
+    if (process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
+      mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    }
   }, [])
 
   const mapStyle =
@@ -149,7 +143,7 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
 
   // Initialize Mapbox map
   useEffect(() => {
-    if (!isOpen || !mapContainerRef.current || !mounted || !tokenLoaded) return
+    if (!isOpen || !mapContainerRef.current || !mounted || !mapboxgl.accessToken) return
 
     if (mapRef.current) {
       mapRef.current.remove()
@@ -233,7 +227,7 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
       mapRef.current = null
       markersRef.current = []
     }
-  }, [isOpen, mapStyle, mounted, tokenLoaded])
+  }, [isOpen, mapStyle, mounted])
 
   // Draw route when selected vendor changes
   useEffect(() => {
@@ -442,7 +436,7 @@ export function PartsLocationFinder({ isOpen, onClose, partName, partImage }: Pa
 
           <div ref={mapContainerRef} className="absolute inset-0" />
 
-          {!tokenLoaded && (
+          {!mapboxgl.accessToken && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />

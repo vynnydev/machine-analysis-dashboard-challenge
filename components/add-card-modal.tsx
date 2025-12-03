@@ -2,11 +2,9 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { X, CreditCard, Lock } from "lucide-react"
 
 interface AddCardModalProps {
@@ -16,7 +14,6 @@ interface AddCardModalProps {
 }
 
 export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) {
-  const [mounted, setMounted] = useState(false)
   const [cardData, setCardData] = useState({
     cardholderName: "",
     cardNumber: "",
@@ -27,28 +24,21 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
   })
 
   useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
-
-  useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden"
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = "unset"
     }
     return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = "unset"
     }
   }, [isOpen])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Generate last 4 digits from card number
     const last4 = cardData.cardNumber.slice(-4)
 
-    // Create new card object
     const newCard = {
       id: Date.now().toString(),
       cardholderName: cardData.cardholderName,
@@ -62,7 +52,6 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
     onAddCard(newCard)
     onClose()
 
-    // Reset form
     setCardData({
       cardholderName: "",
       cardNumber: "",
@@ -97,23 +86,55 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
     }
   }
 
-  if (!mounted || !isOpen) return null
+  if (!isOpen) return null
 
-  const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 99999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+      }}
+    >
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+      <div
         onClick={onClose}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
+          backdropFilter: "blur(4px)",
+        }}
       />
 
       {/* Modal */}
-      <div className="relative bg-background dark:bg-gray-900 rounded-lg shadow-2xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div
+        style={{
+          position: "relative",
+          borderRadius: "0.5rem",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          width: "100%",
+          maxWidth: "28rem",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+        className="bg-background dark:bg-gray-900 border border-border"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-background dark:bg-gray-900 z-10">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-xl font-semibold">Adicionar Novo Cartão</h2>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
@@ -124,20 +145,16 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="cardType">Tipo de Cartão</Label>
-            <Select
+            <select
               value={cardData.cardType}
-              onValueChange={(value) => setCardData({ ...cardData, cardType: value })}
+              onChange={(e) => setCardData({ ...cardData, cardType: e.target.value })}
+              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="visa">VISA</SelectItem>
-                <SelectItem value="mastercard">Mastercard</SelectItem>
-                <SelectItem value="amex">American Express</SelectItem>
-                <SelectItem value="elo">Elo</SelectItem>
-              </SelectContent>
-            </Select>
+              <option value="visa">VISA</option>
+              <option value="mastercard">Mastercard</option>
+              <option value="amex">American Express</option>
+              <option value="elo">Elo</option>
+            </select>
           </div>
 
           <div className="space-y-2">
@@ -216,6 +233,4 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
       </div>
     </div>
   )
-
-  return createPortal(modalContent, document.body)
 }

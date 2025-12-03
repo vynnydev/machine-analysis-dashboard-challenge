@@ -31,8 +31,8 @@ export default function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
   const [balanceVisible, setBalanceVisible] = useState(false)
-  const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false)
-  const [isAllCardsModalOpen, setIsAllCardsModalOpen] = useState(false)
+  const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(true)
+  const [isAllCardsModalOpen, setIsAllCardsModalOpen] = useState(true)
   const [cards, setCards] = useState<CardType[]>([
     {
       id: "1",

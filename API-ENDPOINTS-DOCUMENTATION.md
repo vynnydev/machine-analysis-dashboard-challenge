@@ -15,21 +15,919 @@ Os endpoints estão organizados por domínio e incluem os formatos de requisiç�
 
 ## Índice
 
-1. [Máquinas](#1-máquinas)
-2. [Localizações/Workspaces](#2-localizaçõesworkspaces)
-3. [Funcionários](#3-funcionários)
-4. [Equipe](#4-equipe)
-5. [Tarefas (Kanban)](#5-tarefas-kanban)
-6. [Relatórios](#6-relatórios)
-7. [Inventário](#7-inventário)
-8. [Fornecedores (Peças)](#8-fornecedores-peças)
-9. [AWS Bedrock - Renderização 3D](#9-aws-bedrock---renderização-3d)
-10. [Dashboard](#10-dashboard)
-11. [Monitoramento em Tempo Real](#11-monitoramento-em-tempo-real)
+1. [Autenticação](#1-autenticação)
+2. [Usuários](#2-usuários)
+3. [Máquinas](#3-máquinas)
+4. [Localizações/Workspaces](#4-localizaçõesworkspaces)
+5. [Funcionários](#5-funcionários)
+6. [Equipe](#6-equipe)
+7. [Tarefas (Kanban)](#7-tarefas-kanban)
+8. [Relatórios](#8-relatórios)
+9. [Inventário](#9-inventário)
+10. [Fornecedores (Peças)](#10-fornecedores-peças)
+11. [AWS Bedrock - Renderização 3D](#11-aws-bedrock---renderização-3d)
+12. [Dashboard](#12-dashboard)
+13. [Monitoramento em Tempo Real](#13-monitoramento-em-tempo-real)
+14. [Notificações](#14-notificações)
+15. [Configurações](#15-configurações)
 
 ---
 
-## 1. Máquinas
+## 1. Autenticação
+
+### POST /api/auth/register
+
+Registra um novo usuário no sistema.
+
+**Request Body:**
+\`\`\`json
+{
+  "username": "string (obrigatório, único)",
+  "email": "string (obrigatório, único, formato email válido)",
+  "password": "string (obrigatório, mín 8 caracteres, deve conter maiúscula, minúscula, número e especial)",
+  "name": "string (obrigatório)",
+  "location_id": "string (obrigatório, ID da localização/empresa)",
+  "job_function": "maintenance_engineer | production_manager | quality_inspector | equipment_operator | technician | analyst | supervisor | other"
+}
+\`\`\`
+
+**Response (201 Created):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Usuário registrado com sucesso. Verifique seu email para confirmar a conta.",
+  "user": {
+    "user_id": "uuid",
+    "username": "joao.silva",
+    "email": "joao.silva@empresa.com",
+    "name": "João Silva",
+    "location_id": "loc-001",
+    "email_verified": false,
+    "created_at": "2025-01-15T10:30:00Z"
+  }
+}
+\`\`\`
+
+**Erros Possíveis:**
+| Código | Descrição |
+|--------|-----------|
+| 400 | Dados inválidos ou faltando campos obrigatórios |
+| 409 | Username ou email já cadastrado |
+| 422 | Senha não atende aos requisitos de segurança |
+
+---
+
+### POST /api/auth/login
+
+Autentica um usuário e retorna tokens de acesso.
+
+**Request Body:**
+\`\`\`json
+{
+  "username": "string (obrigatório, pode ser email ou username)",
+  "password": "string (obrigatório)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "user": {
+    "user_id": "uuid",
+    "username": "joao.silva",
+    "email": "joao.silva@empresa.com",
+    "name": "João Silva",
+    "location_id": "loc-001",
+    "email_verified": true,
+    "role": "admin",
+    "job_function": "maintenance_engineer",
+    "avatar_url": "https://storage.cognitiva.com/avatars/uuid.jpg",
+    "last_login": "2025-01-15T10:30:00Z",
+    "preferences": {
+      "theme": "dark",
+      "language": "pt-BR",
+      "notifications_enabled": true
+    }
+  },
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600,
+  "token_type": "Bearer"
+}
+\`\`\`
+
+**Erros Possíveis:**
+| Código | Descrição |
+|--------|-----------|
+| 401 | Credenciais inválidas |
+| 403 | Conta bloqueada ou não verificada |
+| 429 | Muitas tentativas de login |
+
+---
+
+### POST /api/auth/logout
+
+Invalida os tokens do usuário e encerra a sessão.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Logout realizado com sucesso"
+}
+\`\`\`
+
+---
+
+### POST /api/auth/refresh-token
+
+Renova o token de acesso usando o refresh token.
+
+**Request Body:**
+\`\`\`json
+{
+  "refresh_token": "string (obrigatório)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 3600,
+  "token_type": "Bearer"
+}
+\`\`\`
+
+---
+
+### POST /api/auth/forgot-password
+
+Solicita recuperação de senha.
+
+**Request Body:**
+\`\`\`json
+{
+  "email": "string (obrigatório)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Se o email existir em nossa base, você receberá instruções para redefinir sua senha."
+}
+\`\`\`
+
+---
+
+### POST /api/auth/reset-password
+
+Redefine a senha usando o código de verificação.
+
+**Request Body:**
+\`\`\`json
+{
+  "email": "string (obrigatório)",
+  "code": "string (obrigatório, código de 6 dígitos)",
+  "new_password": "string (obrigatório, deve atender requisitos de segurança)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Senha redefinida com sucesso"
+}
+\`\`\`
+
+---
+
+### POST /api/auth/verify-email
+
+Confirma o email do usuário.
+
+**Request Body:**
+\`\`\`json
+{
+  "email": "string (obrigatório)",
+  "code": "string (obrigatório, código de 6 dígitos)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Email verificado com sucesso"
+}
+\`\`\`
+
+---
+
+### POST /api/auth/resend-verification
+
+Reenvia o código de verificação de email.
+
+**Request Body:**
+\`\`\`json
+{
+  "email": "string (obrigatório)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Código de verificação reenviado"
+}
+\`\`\`
+
+---
+
+### POST /api/auth/change-password
+
+Altera a senha do usuário autenticado.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Request Body:**
+\`\`\`json
+{
+  "current_password": "string (obrigatório)",
+  "new_password": "string (obrigatório, deve atender requisitos de segurança)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Senha alterada com sucesso"
+}
+\`\`\`
+
+---
+
+## 2. Usuários
+
+### GET /api/users/me
+
+Retorna os dados do usuário autenticado.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "user_id": "uuid",
+  "username": "joao.silva",
+  "email": "joao.silva@empresa.com",
+  "name": "João Silva",
+  "location_id": "loc-001",
+  "location_name": "Oficina Centro Automotiva",
+  "email_verified": true,
+  "role": "admin",
+  "job_function": "maintenance_engineer",
+  "avatar_url": "https://storage.cognitiva.com/avatars/uuid.jpg",
+  "phone": "+55 11 99999-9999",
+  "created_at": "2025-01-01T00:00:00Z",
+  "last_login": "2025-01-15T10:30:00Z",
+  "preferences": {
+    "theme": "dark",
+    "language": "pt-BR",
+    "notifications_enabled": true,
+    "email_notifications": true,
+    "push_notifications": true
+  },
+  "permissions": {
+    "canManageUsers": true,
+    "canManageTeams": true,
+    "canManageAllMachines": true,
+    "canCreateReports": true,
+    "canViewAllReports": true,
+    "canManageBilling": false,
+    "canAccessAIFeatures": true,
+    "canManageWorkflows": true,
+    "canViewAnalytics": true,
+    "canExportData": true
+  }
+}
+\`\`\`
+
+---
+
+### PUT /api/users/me
+
+Atualiza os dados do usuário autenticado.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Request Body:**
+\`\`\`json
+{
+  "name": "string (opcional)",
+  "phone": "string (opcional)",
+  "avatar_url": "string (opcional, URL da imagem)",
+  "job_function": "string (opcional)",
+  "preferences": {
+    "theme": "light | dark | system",
+    "language": "pt-BR | en-US | es-ES",
+    "notifications_enabled": "boolean",
+    "email_notifications": "boolean",
+    "push_notifications": "boolean"
+  }
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Perfil atualizado com sucesso",
+  "user": {
+    "user_id": "uuid",
+    "name": "João Silva Santos",
+    "phone": "+55 11 99999-9999",
+    "avatar_url": "https://storage.cognitiva.com/avatars/uuid.jpg",
+    "job_function": "maintenance_engineer",
+    "preferences": {
+      "theme": "dark",
+      "language": "pt-BR",
+      "notifications_enabled": true,
+      "email_notifications": true,
+      "push_notifications": true
+    },
+    "updated_at": "2025-01-15T11:00:00Z"
+  }
+}
+\`\`\`
+
+---
+
+### POST /api/users/me/avatar
+
+Faz upload de uma nova foto de perfil.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+\`\`\`
+
+**Request Body:**
+\`\`\`
+file: [arquivo de imagem, máx 5MB, formatos: jpg, png, webp]
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "avatar_url": "https://storage.cognitiva.com/avatars/uuid.jpg"
+}
+\`\`\`
+
+---
+
+### DELETE /api/users/me/avatar
+
+Remove a foto de perfil do usuário.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Foto de perfil removida"
+}
+\`\`\`
+
+---
+
+### GET /api/users
+
+Lista todos os usuários da organização. **Requer permissão: canManageUsers**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Query Parameters:**
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|-----------|------|-------------|-----------|
+| search | string | Não | Busca por nome ou email |
+| role | string | Não | Filtrar por role: `master`, `admin`, `manager`, `technician`, `operator`, `viewer` |
+| status | string | Não | Filtrar por status: `online`, `idle`, `offline` |
+| team_id | string | Não | Filtrar por equipe |
+| page | number | Não | Página (default: 1) |
+| limit | number | Não | Itens por página (default: 20, máx: 100) |
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "users": [
+    {
+      "id": "uuid-1",
+      "name": "Jessica Wong",
+      "email": "jessica@example.com",
+      "role": "admin",
+      "job_function": "maintenance_engineer",
+      "status": "online",
+      "avatar_url": null,
+      "team_id": "team-1",
+      "team_name": "Manutenção",
+      "date_added": "2025-01-24T00:00:00Z",
+      "last_active": "2025-01-15T10:30:00Z"
+    },
+    {
+      "id": "uuid-2",
+      "name": "Julian Nguyen",
+      "email": "julian@example.com",
+      "role": "manager",
+      "job_function": "production_manager",
+      "status": "online",
+      "avatar_url": "https://storage.cognitiva.com/avatars/uuid-2.jpg",
+      "team_id": "team-1",
+      "team_name": "Manutenção",
+      "date_added": "2025-12-12T00:00:00Z",
+      "last_active": "2025-01-15T09:45:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 45,
+    "total_pages": 3
+  },
+  "summary": {
+    "total_users": 45,
+    "by_status": {
+      "online": 28,
+      "idle": 10,
+      "offline": 7
+    },
+    "by_role": {
+      "master": 1,
+      "admin": 3,
+      "manager": 8,
+      "technician": 15,
+      "operator": 12,
+      "viewer": 6
+    }
+  }
+}
+\`\`\`
+
+---
+
+### POST /api/users
+
+Cria um novo usuário (convite). **Requer permissão: canManageUsers**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Request Body:**
+\`\`\`json
+{
+  "email": "string (obrigatório)",
+  "name": "string (obrigatório)",
+  "role": "admin | manager | technician | operator | viewer (obrigatório)",
+  "job_function": "maintenance_engineer | production_manager | quality_inspector | equipment_operator | technician | analyst | supervisor | other",
+  "team_id": "string (opcional)",
+  "send_invite": "boolean (default: true)"
+}
+\`\`\`
+
+**Response (201 Created):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Convite enviado com sucesso",
+  "user": {
+    "id": "uuid",
+    "email": "novo.usuario@empresa.com",
+    "name": "Novo Usuário",
+    "role": "technician",
+    "job_function": "technician",
+    "team_id": "team-1",
+    "status": "pending",
+    "invite_sent_at": "2025-01-15T11:00:00Z",
+    "invite_expires_at": "2025-01-22T11:00:00Z"
+  },
+  "invite_link": "https://app.cognitiva.com.br/invite/abc123xyz"
+}
+\`\`\`
+
+**Erros Possíveis:**
+| Código | Descrição |
+|--------|-----------|
+| 400 | Dados inválidos |
+| 403 | Sem permissão para criar usuários com este role |
+| 409 | Email já cadastrado |
+
+---
+
+### GET /api/users/:id
+
+Retorna os dados de um usuário específico. **Requer permissão: canManageUsers**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "id": "uuid",
+  "username": "jessica.wong",
+  "email": "jessica@example.com",
+  "name": "Jessica Wong",
+  "role": "admin",
+  "job_function": "maintenance_engineer",
+  "status": "online",
+  "avatar_url": null,
+  "phone": "+55 11 98888-8888",
+  "team_id": "team-1",
+  "team_name": "Manutenção",
+  "location_id": "loc-001",
+  "location_name": "Oficina Centro Automotiva",
+  "date_added": "2025-01-24T00:00:00Z",
+  "last_active": "2025-01-15T10:30:00Z",
+  "email_verified": true,
+  "permissions": {
+    "canManageUsers": true,
+    "canManageTeams": true,
+    "canManageAllMachines": true,
+    "canCreateReports": true,
+    "canViewAllReports": true,
+    "canManageBilling": false,
+    "canAccessAIFeatures": true,
+    "canManageWorkflows": true,
+    "canViewAnalytics": true,
+    "canExportData": true
+  },
+  "activity_stats": {
+    "tasks_completed_this_month": 24,
+    "reports_generated": 8,
+    "machines_analyzed": 15,
+    "avg_response_time_minutes": 12
+  }
+}
+\`\`\`
+
+---
+
+### PUT /api/users/:id
+
+Atualiza os dados de um usuário. **Requer permissão: canManageUsers**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Request Body:**
+\`\`\`json
+{
+  "name": "string (opcional)",
+  "role": "admin | manager | technician | operator | viewer (opcional)",
+  "job_function": "string (opcional)",
+  "team_id": "string (opcional)",
+  "status": "active | suspended (opcional)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Usuário atualizado com sucesso",
+  "user": {
+    "id": "uuid",
+    "name": "Jessica Wong",
+    "role": "manager",
+    "job_function": "production_manager",
+    "team_id": "team-2",
+    "updated_at": "2025-01-15T11:00:00Z"
+  }
+}
+\`\`\`
+
+**Regras de Negócio:**
+- Master não pode ter seu role alterado
+- Admin só pode ser alterado por Master
+- Usuário não pode alterar seu próprio role
+
+---
+
+### DELETE /api/users/:id
+
+Remove um usuário do sistema. **Requer permissão: canManageUsers**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Query Parameters:**
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|-----------|------|-------------|-----------|
+| transfer_to | string | Não | ID do usuário para transferir tarefas pendentes |
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Usuário removido com sucesso",
+  "transferred_items": {
+    "tasks": 5,
+    "machines_assigned": 2,
+    "reports_owned": 12
+  }
+}
+\`\`\`
+
+**Regras de Negócio:**
+- Master não pode ser removido
+- Admin só pode ser removido por Master
+- Usuário não pode remover a si mesmo
+
+---
+
+### POST /api/users/:id/resend-invite
+
+Reenvia convite para um usuário pendente. **Requer permissão: canManageUsers**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Convite reenviado com sucesso",
+  "invite_expires_at": "2025-01-22T11:00:00Z"
+}
+\`\`\`
+
+---
+
+### POST /api/users/invite/accept
+
+Aceita um convite e finaliza o cadastro.
+
+**Request Body:**
+\`\`\`json
+{
+  "invite_token": "string (obrigatório)",
+  "username": "string (obrigatório)",
+  "password": "string (obrigatório)",
+  "phone": "string (opcional)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Conta criada com sucesso",
+  "user": {
+    "user_id": "uuid",
+    "username": "novo.usuario",
+    "email": "novo.usuario@empresa.com",
+    "name": "Novo Usuário",
+    "role": "technician"
+  },
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+\`\`\`
+
+---
+
+### GET /api/users/roles
+
+Lista os roles disponíveis e suas permissões.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "roles": [
+    {
+      "id": "master",
+      "name": "Master",
+      "description": "Proprietário da conta com acesso total",
+      "permissions": {
+        "canManageUsers": true,
+        "canManageTeams": true,
+        "canManageAllMachines": true,
+        "canCreateReports": true,
+        "canViewAllReports": true,
+        "canManageBilling": true,
+        "canAccessAIFeatures": true,
+        "canManageWorkflows": true,
+        "canViewAnalytics": true,
+        "canExportData": true
+      },
+      "assignable": false
+    },
+    {
+      "id": "admin",
+      "name": "Administrador",
+      "description": "Administrador com permissões amplas",
+      "permissions": {
+        "canManageUsers": true,
+        "canManageTeams": true,
+        "canManageAllMachines": true,
+        "canCreateReports": true,
+        "canViewAllReports": true,
+        "canManageBilling": false,
+        "canAccessAIFeatures": true,
+        "canManageWorkflows": true,
+        "canViewAnalytics": true,
+        "canExportData": true
+      },
+      "assignable": true
+    },
+    {
+      "id": "manager",
+      "name": "Gerente",
+      "description": "Gerente de equipe",
+      "permissions": {
+        "canManageUsers": false,
+        "canManageTeams": true,
+        "canManageAllMachines": false,
+        "canCreateReports": true,
+        "canViewAllReports": false,
+        "canManageBilling": false,
+        "canAccessAIFeatures": true,
+        "canManageWorkflows": true,
+        "canViewAnalytics": true,
+        "canExportData": true
+      },
+      "assignable": true
+    },
+    {
+      "id": "technician",
+      "name": "Técnico",
+      "description": "Técnico de manutenção",
+      "permissions": {
+        "canManageUsers": false,
+        "canManageTeams": false,
+        "canManageAllMachines": false,
+        "canCreateReports": true,
+        "canViewAllReports": false,
+        "canManageBilling": false,
+        "canAccessAIFeatures": false,
+        "canManageWorkflows": false,
+        "canViewAnalytics": false,
+        "canExportData": false
+      },
+      "assignable": true
+    },
+    {
+      "id": "operator",
+      "name": "Operador",
+      "description": "Operador de equipamentos",
+      "permissions": {
+        "canManageUsers": false,
+        "canManageTeams": false,
+        "canManageAllMachines": false,
+        "canCreateReports": false,
+        "canViewAllReports": false,
+        "canManageBilling": false,
+        "canAccessAIFeatures": false,
+        "canManageWorkflows": false,
+        "canViewAnalytics": false,
+        "canExportData": false
+      },
+      "assignable": true
+    },
+    {
+      "id": "viewer",
+      "name": "Visualizador",
+      "description": "Acesso apenas para visualização",
+      "permissions": {
+        "canManageUsers": false,
+        "canManageTeams": false,
+        "canManageAllMachines": false,
+        "canCreateReports": false,
+        "canViewAllReports": false,
+        "canManageBilling": false,
+        "canAccessAIFeatures": false,
+        "canManageWorkflows": false,
+        "canViewAnalytics": false,
+        "canExportData": false
+      },
+      "assignable": true
+    }
+  ],
+  "job_functions": [
+    { "id": "maintenance_engineer", "name": "Engenheiro de Manutenção" },
+    { "id": "production_manager", "name": "Gerente de Produção" },
+    { "id": "quality_inspector", "name": "Inspetor de Qualidade" },
+    { "id": "equipment_operator", "name": "Operador de Equipamento" },
+    { "id": "technician", "name": "Técnico" },
+    { "id": "analyst", "name": "Analista" },
+    { "id": "supervisor", "name": "Supervisor" },
+    { "id": "other", "name": "Outro" }
+  ]
+}
+\`\`\`
+
+---
+
+### GET /api/users/activity-log
+
+Retorna o log de atividades dos usuários. **Requer permissão: canManageUsers**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Query Parameters:**
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|-----------|------|-------------|-----------|
+| user_id | string | Não | Filtrar por usuário específico |
+| action_type | string | Não | Tipo de ação: `login`, `logout`, `create`, `update`, `delete` |
+| resource_type | string | Não | Tipo de recurso: `machine`, `task`, `report`, `user` |
+| start_date | string | Não | Data inicial (ISO 8601) |
+| end_date | string | Não | Data final (ISO 8601) |
+| page | number | Não | Página (default: 1) |
+| limit | number | Não | Itens por página (default: 50) |
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "activities": [
+    {
+      "id": "activity-001",
+      "user_id": "uuid-1",
+      "user_name": "João Silva",
+      "action_type": "update",
+      "resource_type": "machine",
+      "resource_id": "machine-001",
+      "resource_name": "Bomba Centrífuga BC-2000",
+      "description": "Atualizou status para 'Em manutenção'",
+      "ip_address": "192.168.1.100",
+      "user_agent": "Mozilla/5.0...",
+      "timestamp": "2025-01-15T10:30:00Z",
+      "metadata": {
+        "old_status": "operational",
+        "new_status": "maintenance"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "total": 1250,
+    "total_pages": 25
+  }
+}
+\`\`\`
+
+---
+
+## 3. Máquinas
 
 ### GET /api/machines
 
@@ -357,7 +1255,7 @@ Remove uma máquina do sistema.
 
 ---
 
-## 2. Localizações/Workspaces
+## 4. Localizações/Workspaces
 
 ### GET /api/locations
 
@@ -551,7 +1449,7 @@ Remove uma localização.
 
 ---
 
-## 3. Funcionários
+## 5. Funcionários
 
 ### GET /api/employees
 
@@ -649,7 +1547,7 @@ Atualiza status do funcionário.
 
 ---
 
-## 4. Equipe
+## 6. Equipe
 
 ### GET /api/team/members
 
@@ -731,7 +1629,7 @@ Retorna lista de projetos para categorização de tarefas.
 
 ---
 
-## 5. Tarefas (Kanban)
+## 7. Tarefas (Kanban)
 
 ### GET /api/tasks
 
@@ -921,7 +1819,7 @@ Adiciona anexo à tarefa (multipart/form-data).
 
 ---
 
-## 6. Relatórios
+## 8. Relatórios
 
 ### GET /api/reports/machines
 
@@ -1045,7 +1943,7 @@ Exporta relatório em PDF.
 
 ---
 
-## 7. Inventário
+## 9. Inventário
 
 ### GET /api/inventory
 
@@ -1146,7 +2044,7 @@ Registra movimentação de estoque.
 
 ---
 
-## 8. Fornecedores (Peças)
+## 10. Fornecedores (Peças)
 
 ### GET /api/vendors
 
@@ -1255,7 +2153,7 @@ Retorna rota até o fornecedor.
 
 ---
 
-## 9. AWS Bedrock - Renderização 3D
+## 11. AWS Bedrock - Renderização 3D
 
 ### GET /api/bedrock/render-config
 
@@ -1573,7 +2471,7 @@ Solicita geração de modelo 3D para uma máquina.
 
 ---
 
-## 10. Dashboard
+## 12. Dashboard
 
 ### GET /api/dashboard/summary
 
@@ -1681,7 +2579,7 @@ Retorna dados para gráficos do dashboard.
 
 ---
 
-## 11. Monitoramento em Tempo Real
+## 13. Monitoramento em Tempo Real
 
 ### WebSocket /ws/monitoring
 
@@ -1761,6 +2659,327 @@ Conexão WebSocket para receber atualizações em tempo real.
 
 ---
 
+## 14. Notificações
+
+### GET /api/notifications
+
+Retorna a lista de notificações do usuário autenticado.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Query Parameters:**
+| Parâmetro | Tipo | Obrigatório | Descrição |
+|-----------|------|-------------|-----------|
+| unread | boolean | Não | Filtrar apenas notificações não lidas |
+| page | number | Não | Página (default: 1) |
+| limit | number | Não | Itens por página (default: 20) |
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "notifications": [
+    {
+      "id": "notification-001",
+      "type": "machine_alert",
+      "title": "Alerta Crítico: Bomba BC-2000",
+      "message": "Temperatura da Bomba Centrífuga BC-2000 atingiu 85°C.",
+      "read": false,
+      "created_at": "2025-01-15T10:30:00Z",
+      "data": {
+        "machine_id": "machine-1",
+        "value": 85,
+        "threshold": 85
+      },
+      "link": "/machines/machine-1/alerts"
+    },
+    {
+      "id": "notification-002",
+      "type": "task_assigned",
+      "title": "Nova Tarefa: Inspeção Urgente",
+      "message": "Você foi designado para a tarefa 'Inspeção de Bomba Centrífuga'.",
+      "read": true,
+      "created_at": "2025-01-14T09:00:00Z",
+      "data": {
+        "task_id": "1",
+        "assigner": "João Silva"
+      },
+      "link": "/tasks/1"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 15,
+    "total_pages": 1
+  },
+  "summary": {
+    "total_notifications": 15,
+    "unread_count": 3
+  }
+}
+\`\`\`
+
+---
+
+### POST /api/notifications/mark-as-read
+
+Marca notificações como lidas.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Request Body:**
+\`\`\`json
+{
+  "notification_ids": ["notification-001", "notification-002"]
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Notificações marcadas como lidas",
+  "read_count": 2
+}
+\`\`\`
+
+---
+
+### DELETE /api/notifications/:id
+
+Exclui uma notificação específica.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Notificação excluída"
+}
+\`\`\`
+
+---
+
+### POST /api/notifications/read-all
+
+Marca todas as notificações como lidas.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Todas as notificações foram marcadas como lidas",
+  "read_count": 15
+}
+\`\`\`
+
+---
+
+## 15. Configurações
+
+### GET /api/settings/general
+
+Retorna configurações gerais da aplicação.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "settings": {
+    "company_name": "Cognitiva Analytics",
+    "logo_url": "https://storage.cognitiva.com/logos/cognitiva-logo.png",
+    "default_language": "pt-BR",
+    "support_email": "support@cognitiva.com.br",
+    "terms_of_service_url": "https://cognitiva.com.br/terms",
+    "privacy_policy_url": "https://cognitiva.com.br/privacy"
+  }
+}
+\`\`\`
+
+---
+
+### PUT /api/settings/general
+
+Atualiza configurações gerais da aplicação. **Requer permissão: canManageSettings**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Request Body:**
+\`\`\`json
+{
+  "company_name": "string (opcional)",
+  "logo_url": "string (opcional, URL da imagem)",
+  "default_language": "string (opcional, ex: pt-BR, en-US)",
+  "support_email": "string (opcional)",
+  "terms_of_service_url": "string (opcional)",
+  "privacy_policy_url": "string (opcional)"
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Configurações gerais atualizadas",
+  "settings": {
+    "company_name": "Cognitiva Analytics S.A.",
+    "logo_url": "https://storage.cognitiva.com/logos/cognitiva-logo-new.png",
+    "default_language": "en-US",
+    "support_email": "support@cognitiva.com.br",
+    "terms_of_service_url": "https://cognitiva.com.br/terms",
+    "privacy_policy_url": "https://cognitiva.com.br/privacy"
+  }
+}
+\`\`\`
+
+---
+
+### GET /api/settings/billing
+
+Retorna informações de faturamento da conta. **Requer permissão: canManageBilling**
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "billing": {
+    "plan": "Enterprise",
+    "plan_id": "plan-ent-001",
+    "renewal_date": "2025-12-31T00:00:00Z",
+    "status": "active",
+    "payment_method": {
+      "type": "credit_card",
+      "last_four_digits": "1234",
+      "brand": "Visa",
+      "expiry_month": 10,
+      "expiry_year": 2027
+    },
+    "billing_address": {
+      "street": "Rua das Empresas, 1000",
+      "city": "São Paulo",
+      "state": "SP",
+      "postal_code": "01000-000",
+      "country": "Brasil"
+    },
+    "invoices": [
+      {
+        "id": "inv-001",
+        "date": "2024-11-15T00:00:00Z",
+        "amount": 599.90,
+        "currency": "BRL",
+        "status": "paid",
+        "download_url": "https://storage.cognitiva.com/invoices/inv-001.pdf"
+      }
+    ]
+  }
+}
+\`\`\`
+
+---
+
+### GET /api/settings/integrations
+
+Retorna configurações de integrações ativas.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "integrations": [
+    {
+      "id": "aws_s3",
+      "name": "Amazon S3",
+      "description": "Armazenamento de arquivos na nuvem AWS S3.",
+      "is_enabled": true,
+      "config": {
+        "bucket_name": "cognitiva-analytics-data",
+        "region": "us-east-1"
+      },
+      "setup_url": "/settings/integrations/aws_s3/setup"
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "description": "Receber notificações no canal do Slack.",
+      "is_enabled": false,
+      "config": null,
+      "setup_url": "/settings/integrations/slack/setup"
+    },
+    {
+      "id": "google_maps",
+      "name": "Google Maps API",
+      "description": "Utilizado para visualização de mapas e rotas.",
+      "is_enabled": true,
+      "config": {
+        "api_key_status": "active"
+      }
+    }
+  ]
+}
+\`\`\`
+
+---
+
+### POST /api/settings/integrations/:id/setup
+
+Inicia o processo de configuração de uma integração.
+
+**Headers:**
+\`\`\`
+Authorization: Bearer {access_token}
+\`\`\`
+
+**Request Body:**
+\`\`\`json
+{
+  "configuration": {
+    "param1": "value1",
+    "param2": "value2"
+  }
+}
+\`\`\`
+
+**Response (200 OK):**
+\`\`\`json
+{
+  "success": true,
+  "message": "Configuração da integração iniciada. Siga as instruções na tela para completar.",
+  "redirect_url": "https://auth.cognitiva.com/oauth/provider/xyz"
+}
+\`\`\`
+
+---
+
 ## Códigos de Erro
 
 | Código | Descrição |
@@ -1834,5 +3053,8 @@ Versões anteriores serão mantidas por 6 meses após deprecation.
 ## Ambiente de Desenvolvimento
 
 **Base URL Mock:** `/api/mock/...`
+
+Os endpoints mock retornam dados simulados para desenvolvimento e testes do frontend.
+ URL Mock:** `/api/mock/...`
 
 Os endpoints mock retornam dados simulados para desenvolvimento e testes do frontend.

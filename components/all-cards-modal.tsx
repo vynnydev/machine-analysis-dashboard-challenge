@@ -1,7 +1,4 @@
 "use client"
-
-import { useState, useEffect } from "react"
-import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { X, CreditCard, MoreVertical, Trash2, Star } from "lucide-react"
@@ -26,23 +23,7 @@ interface AllCardsModalProps {
 }
 
 export function AllCardsModal({ isOpen, onClose, cards, onSetDefault, onDeleteCard }: AllCardsModalProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "unset"
-    }
-    return () => {
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen])
+  if (!isOpen) return null
 
   const getCardColor = (cardType: string, index: number) => {
     const colors = [
@@ -69,26 +50,13 @@ export function AllCardsModal({ isOpen, onClose, cards, onSetDefault, onDeleteCa
     }
   }
 
-  // Don't render anything if not mounted or not open
-  if (!mounted || !isOpen) return null
-
-  const modalContent = (
-    <div 
-      className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ zIndex: 9999 }}
-    >
+  return (
+    <>
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-        onClick={onClose}
-        style={{ zIndex: 9999 }}
-      />
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" onClick={onClose} />
 
       {/* Modal */}
-      <div 
-        className="relative w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden"
-        style={{ zIndex: 10000 }}
-      >
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-5xl max-h-[90vh] z-50 overflow-hidden">
         <div className="bg-background dark:bg-gray-900 rounded-lg shadow-2xl border border-border flex flex-col max-h-[90vh]">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0">
@@ -135,7 +103,7 @@ export function AllCardsModal({ isOpen, onClose, cards, onSetDefault, onDeleteCa
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" style={{ zIndex: 10001 }}>
+                          <DropdownMenuContent align="end">
                             {!card.isDefault && (
                               <DropdownMenuItem onClick={() => onSetDefault(card.id)}>
                                 <Star className="w-4 h-4 mr-2" />
@@ -197,9 +165,6 @@ export function AllCardsModal({ isOpen, onClose, cards, onSetDefault, onDeleteCa
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
-
-  // Use createPortal to render modal at document.body level
-  return createPortal(modalContent, document.body)
 }

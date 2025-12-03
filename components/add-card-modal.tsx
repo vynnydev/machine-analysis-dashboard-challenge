@@ -45,8 +45,10 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Generate last 4 digits from card number
     const last4 = cardData.cardNumber.slice(-4)
 
+    // Create new card object
     const newCard = {
       id: Date.now().toString(),
       cardholderName: cardData.cardholderName,
@@ -60,6 +62,7 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
     onAddCard(newCard)
     onClose()
 
+    // Reset form
     setCardData({
       cardholderName: "",
       cardNumber: "",
@@ -94,28 +97,20 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
     }
   }
 
-  // Don't render anything if not mounted or not open
   if (!mounted || !isOpen) return null
 
   const modalContent = (
-    <div 
-      className="fixed inset-0 flex items-center justify-center p-4"
-      style={{ zIndex: 9999 }}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
         onClick={onClose}
-        style={{ zIndex: 9999 }}
       />
 
       {/* Modal */}
-      <div 
-        className="relative bg-background dark:bg-gray-900 rounded-lg shadow-2xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto"
-        style={{ zIndex: 10000 }}
-      >
+      <div className="relative bg-background dark:bg-gray-900 rounded-lg shadow-2xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-background dark:bg-gray-900">
+        <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-background dark:bg-gray-900 z-10">
           <h2 className="text-xl font-semibold">Adicionar Novo Cartão</h2>
           <button 
             onClick={onClose} 
@@ -136,7 +131,7 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent style={{ zIndex: 10001 }}>
+              <SelectContent>
                 <SelectItem value="visa">VISA</SelectItem>
                 <SelectItem value="mastercard">Mastercard</SelectItem>
                 <SelectItem value="amex">American Express</SelectItem>
@@ -222,6 +217,5 @@ export function AddCardModal({ isOpen, onClose, onAddCard }: AddCardModalProps) 
     </div>
   )
 
-  // Use createPortal to render modal at document.body level
   return createPortal(modalContent, document.body)
 }

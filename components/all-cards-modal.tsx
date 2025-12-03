@@ -69,15 +69,26 @@ export function AllCardsModal({ isOpen, onClose, cards, onSetDefault, onDeleteCa
     }
   }
 
+  // Don't render anything if not mounted or not open
   if (!mounted || !isOpen) return null
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ zIndex: 9999 }}
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+        onClick={onClose}
+        style={{ zIndex: 9999 }}
+      />
 
       {/* Modal */}
-      <div className="relative w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden">
+      <div 
+        className="relative w-[95vw] max-w-5xl max-h-[90vh] overflow-hidden"
+        style={{ zIndex: 10000 }}
+      >
         <div className="bg-background dark:bg-gray-900 rounded-lg shadow-2xl border border-border flex flex-col max-h-[90vh]">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0">
@@ -124,7 +135,7 @@ export function AllCardsModal({ isOpen, onClose, cards, onSetDefault, onDeleteCa
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" style={{ zIndex: 10001 }}>
                             {!card.isDefault && (
                               <DropdownMenuItem onClick={() => onSetDefault(card.id)}>
                                 <Star className="w-4 h-4 mr-2" />
@@ -189,5 +200,6 @@ export function AllCardsModal({ isOpen, onClose, cards, onSetDefault, onDeleteCa
     </div>
   )
 
+  // Use createPortal to render modal at document.body level
   return createPortal(modalContent, document.body)
 }

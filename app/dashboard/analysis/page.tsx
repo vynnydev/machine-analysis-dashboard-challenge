@@ -422,20 +422,20 @@ function AnalysisPage() {
   const currentLocation = workshopLocations.find(loc => loc.id === selectedLocation)
   const currentMachines = currentLocation?.machines || []
 
-  useEffect(() => {
-    const loadMachines = async () => {
-      try {
-        const data = await fetchMachines()
-        setMachines(data)
-        if (currentMachines.length > 0) {
-          setSelectedMachine(currentMachines[0] as any)
-        }
-      } catch (error) {
-        console.error('Erro ao carregar máquinas:', error)
-      }
-    }
-    loadMachines()
-  }, [selectedLocation])
+  // useEffect(() => {
+  //   const loadMachines = async () => {
+  //     try {
+  //       const data = await fetchMachines()
+  //       setMachines(data)
+  //       if (currentMachines.length > 0) {
+  //         setSelectedMachine(currentMachines[0] as any)
+  //       }
+  //     } catch (error) {
+  //       console.error('Erro ao carregar máquinas:', error)
+  //     }
+  //   }
+  //   loadMachines()
+  // }, [selectedLocation])
 
   const currentMachineParts = selectedMachine ? machineParts[selectedMachine.name as keyof typeof machineParts] || [] : []
 

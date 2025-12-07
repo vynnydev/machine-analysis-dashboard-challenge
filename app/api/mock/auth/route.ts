@@ -4,10 +4,10 @@ import { NextResponse } from "next/server"
 const mockUsers = [
   {
     user_id: "usr_001",
-    username: "joao.silva",
-    email: "joao.silva@cognitiva.com",
+    username: "vynnydev",
+    email: "vynnydev@cognitiva.com",
     password: "123456",
-    name: "João Silva",
+    name: "Vinicius Prudencio",
     role: "master",
     location_id: "loc_001",
     email_verified: true,

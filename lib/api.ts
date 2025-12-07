@@ -766,10 +766,35 @@ export interface LoginResponse {
 }
 
 const API_BASE_URL = "https://nm55w7i9ug.execute-api.us-east-1.amazonaws.com/prod"
+const MOCK_API_URL = "/api/mock"
+const USE_MOCK_API = true
 
 export async function registerUser(data: RegisterRequest): Promise<RegisterResponse> {
   try {
     console.log("[v0] Registering user:", { ...data, password: "***" })
+
+    if (USE_MOCK_API) {
+      const response = await fetch(`${MOCK_API_URL}/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          action: "register",
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.message || `Erro no registro: ${response.status}`
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      console.log("[v0] Mock registration successful:", result)
+      return result
+    }
 
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: "POST",
@@ -802,6 +827,34 @@ export async function registerUser(data: RegisterRequest): Promise<RegisterRespo
 export async function loginUser(data: LoginRequest): Promise<LoginResponse> {
   try {
     console.log("[v0] Logging in user:", data.username)
+
+    if (USE_MOCK_API) {
+      const response = await fetch(`${MOCK_API_URL}/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          action: "login",
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.message || `Erro no login: ${response.status}`
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      console.log("[v0] Mock login successful:", {
+        ...result,
+        access_token: "***",
+        id_token: "***",
+        refresh_token: "***",
+      })
+      return result
+    }
 
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",

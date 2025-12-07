@@ -20,10 +20,11 @@ import {
   SpaceIcon as WorkspaceIcon,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { AccountSwitcher } from "@/components/account-switcher"
+import { useAuth } from "@/contexts/auth-context"
 
 interface DashboardSidebarProps {
   sidebarOpen: boolean
@@ -33,6 +34,8 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ sidebarOpen, setSidebarOpen, forceCollapsed }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { logout } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
@@ -104,8 +107,15 @@ export function DashboardSidebar({ sidebarOpen, setSidebarOpen, forceCollapsed }
     },
   ]
 
-  const handleLogout = () => {
-    console.log("[v0] Logout clicked (auth disabled for development)")
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push("/login")
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error)
+      // Redirect anyway even if there's an error
+      router.push("/login")
+    }
   }
 
   return (
@@ -137,7 +147,7 @@ export function DashboardSidebar({ sidebarOpen, setSidebarOpen, forceCollapsed }
               <Button
                 variant="ghost"
                 size="sm"
-                className="hidden lg:flex w-full text-blue-200 hover:text-white hover:bg-blue-700 justify-start gap-2"
+                className="hidden lg:flex w-full text-blue-200 hover:text-white hover:bg-blue-700/50 dark:hover:bg-blue-800/50 justify-start gap-2"
                 onClick={() => setCollapsed(!collapsed)}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -152,7 +162,7 @@ export function DashboardSidebar({ sidebarOpen, setSidebarOpen, forceCollapsed }
               <Button
                 variant="ghost"
                 size="icon"
-                className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700"
+                className="hidden lg:flex text-blue-200 hover:text-white hover:bg-blue-700/50 dark:hover:bg-blue-800/50"
                 onClick={() => setCollapsed(!collapsed)}
                 title="Expandir menu"
               >

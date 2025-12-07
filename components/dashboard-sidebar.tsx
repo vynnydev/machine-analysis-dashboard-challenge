@@ -20,7 +20,7 @@ import {
   SpaceIcon as WorkspaceIcon,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { AccountSwitcher } from "@/components/account-switcher"
@@ -34,9 +34,8 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ sidebarOpen, setSidebarOpen, forceCollapsed }: DashboardSidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
-  const { logout } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
+  const { logout } = useAuth()
 
   useEffect(() => {
     if (forceCollapsed !== undefined) {
@@ -107,15 +106,8 @@ export function DashboardSidebar({ sidebarOpen, setSidebarOpen, forceCollapsed }
     },
   ]
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-      router.push("/login")
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error)
-      // Redirect anyway even if there's an error
-      router.push("/login")
-    }
+  const handleLogout = () => {
+    logout()
   }
 
   return (

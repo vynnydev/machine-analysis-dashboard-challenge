@@ -1,17 +1,112 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { useTheme } from "@/contexts/theme-context"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { X } from 'lucide-react'
 
 interface Machine3DViewerProps {
   machineName: string
   machineType: string
+  isAnalyzing?: boolean
+  onAnalysisComplete?: (parts: MachinePart[]) => void
 }
 
-export function Machine3DViewer({ machineName, machineType }: Machine3DViewerProps) {
+interface MachinePart {
+  id: string
+  name: string
+  status: "healthy" | "warning" | "critical"
+  position: { x: number; y: number; z: number }
+  marker: string
+}
+
+export function Machine3DViewer({ machineName, machineType, isAnalyzing = false, onAnalysisComplete }: Machine3DViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
+  const [scanProgress, setScanProgress] = useState(0)
+  const [detectedParts, setDetectedParts] = useState<MachinePart[]>([])
+  const [showParts, setShowParts] = useState(false)
+
+  const handleClearAnalysis = () => {
+    setDetectedParts([])
+    setShowParts(false)
+    setScanProgress(0)
+  }
+
+  // Add scanning animation effect
+  useEffect(() => {
+    if (isAnalyzing) {
+      setShowParts(false)
+      setDetectedParts([])
+      setScanProgress(0)
+      
+      const interval = setInterval(() => {
+        setScanProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            // Generate detected parts based on machine type
+            const parts = generateMachineParts(machineType)
+            setDetectedParts(parts)
+            setShowParts(true)
+            if (onAnalysisComplete) {
+              onAnalysisComplete(parts)
+            }
+            return 100
+          }
+          return prev + 2
+        })
+      }, 50)
+
+      return () => clearInterval(interval)
+    }
+  }, [isAnalyzing, machineType, onAnalysisComplete])
+
+  const generateMachineParts = (type: string): MachinePart[] => {
+    const basePosition = { x: 0, y: 1.5, z: 0 }
+    
+    if (type.includes("pump") || type.includes("bomba")) {
+      return [
+        { id: "A", name: "Motor Elétrico", status: "healthy", position: { x: -1, y: 1.5, z: 0 }, marker: "A" },
+        { id: "B", name: "Impelidor", status: "healthy", position: { x: 1.5, y: 1.5, z: 0 }, marker: "B" },
+        { id: "C", name: "Voluta", status: "warning", position: { x: 1.5, y: 1.5, z: 1 }, marker: "C" },
+        { id: "D", name: "Eixo", status: "healthy", position: { x: 0.5, y: 1.5, z: 0 }, marker: "D" },
+        { id: "E", name: "Selo Mecânico", status: "critical", position: { x: 0.5, y: 1.2, z: 0.5 }, marker: "E" },
+      ]
+    } else if (type.includes("cnc") || type.includes("lathe")) {
+      return [
+        { id: "1", name: "Mandril", status: "healthy", position: { x: -3.5, y: 1.4, z: 0 }, marker: "1" },
+        { id: "2", name: "Torre Ferramentas", status: "healthy", position: { x: 0.5, y: 1.5, z: 0 }, marker: "2" },
+        { id: "3", name: "Contraponto", status: "warning", position: { x: 2.5, y: 1, z: 0 }, marker: "3" },
+        { id: "4", name: "Painel CNC", status: "healthy", position: { x: 3.5, y: 1.8, z: -1 }, marker: "4" },
+        { id: "5", name: "Barramento", status: "healthy", position: { x: 0, y: 0.675, z: 0 }, marker: "5" },
+      ]
+    } else if (type.includes("motor") || type.includes("engine")) {
+      return [
+        { id: "A", name: "Turbocompressor", status: "warning", position: { x: -1.8, y: 1.8, z: 1.2 }, marker: "A" },
+        { id: "B", name: "Bloco do Motor", status: "healthy", position: { x: 0, y: 1.5, z: 0 }, marker: "B" },
+        { id: "C", name: "Cabeçotes", status: "healthy", position: { x: 0, y: 2.5, z: 0 }, marker: "C" },
+        { id: "D", name: "Intercooler", status: "healthy", position: { x: 1.5, y: 1.5, z: 1.5 }, marker: "D" },
+        { id: "E", name: "Coletor Escape", status: "critical", position: { x: -1, y: 2.2, z: -1 }, marker: "E" },
+      ]
+    } else if (type.includes("compressor")) {
+      return [
+        { id: "1", name: "Reservatório", status: "healthy", position: { x: 0.5, y: 1.2, z: 0 }, marker: "1" },
+        { id: "2", name: "Motor", status: "healthy", position: { x: -1.2, y: 1, z: 0 }, marker: "2" },
+        { id: "3", name: "Cabeçote", status: "warning", position: { x: -1.2, y: 1.7, z: 0 }, marker: "3" },
+        { id: "4", name: "Válvulas", status: "healthy", position: { x: -1.2, y: 2.1, z: 0.3 }, marker: "4" },
+        { id: "5", name: "Manômetro", status: "healthy", position: { x: 0.5, y: 1.2, z: 0.9 }, marker: "5" },
+      ]
+    }
+    
+    return [
+      { id: "1", name: "Componente Principal", status: "healthy", position: basePosition, marker: "1" },
+      { id: "2", name: "Sistema Elétrico", status: "healthy", position: { ...basePosition, x: basePosition.x + 2 }, marker: "2" },
+      { id: "3", name: "Painel Controle", status: "warning", position: { ...basePosition, x: basePosition.x + 4 }, marker: "3" },
+    ]
+  }
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -340,7 +435,7 @@ export function Machine3DViewer({ machineName, machineType }: Machine3DViewerPro
       gaugeFace.position.set(2.8, 2.5, 0.56)
       machineGroup.add(gaugeFace)
 
-    } 
+    }
     // TORNO CNC DETALHADO
     else if (type.includes("cnc") || type.includes("lathe") || type.includes("torno")) {
       console.log("🎨 TORNO CNC REALISTA")
@@ -606,7 +701,7 @@ export function Machine3DViewer({ machineName, machineType }: Machine3DViewerPro
       chipTray.position.set(0, 0.55, 0)
       machineGroup.add(chipTray)
 
-    } 
+    }
     // MOTOR V8 TURBO DETALHADO
     else if (type.includes("motor") || type.includes("engine") || type.includes("v8")) {
       console.log("🎨 MOTOR V8 TURBO REALISTA")
@@ -1361,6 +1456,36 @@ export function Machine3DViewer({ machineName, machineType }: Machine3DViewerPro
     scene.add(machineGroup)
     console.log("✅ Máquina realista adicionada!")
 
+    if (showParts && detectedParts.length > 0) {
+      detectedParts.forEach((part) => {
+        // Marker sphere
+        const markerGeometry = new THREE.SphereGeometry(0.15, 32, 32)
+        const markerMaterial = new THREE.MeshStandardMaterial({
+          color: part.status === "healthy" ? 0x00ff00 : part.status === "warning" ? 0xffaa00 : 0xff0000,
+          emissive: part.status === "healthy" ? 0x00ff00 : part.status === "warning" ? 0xffaa00 : 0xff0000,
+          emissiveIntensity: 0.6,
+          metalness: 0.8,
+          roughness: 0.2,
+        })
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial)
+        marker.position.set(part.position.x, part.position.y, part.position.z)
+        scene.add(marker)
+
+        // Marker line
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(part.position.x, part.position.y, part.position.z),
+          new THREE.Vector3(part.position.x, part.position.y + 1, part.position.z),
+        ])
+        const lineMaterial = new THREE.LineBasicMaterial({
+          color: part.status === "healthy" ? 0x00ff00 : part.status === "warning" ? 0xffaa00 : 0xff0000,
+          opacity: 0.7,
+          transparent: true,
+        })
+        const line = new THREE.Line(lineGeometry, lineMaterial)
+        scene.add(line)
+      })
+    }
+
     // Chão
     const ground = new THREE.Mesh(
       new THREE.CircleGeometry(15, 64),
@@ -1467,17 +1592,96 @@ export function Machine3DViewer({ machineName, machineType }: Machine3DViewerPro
       renderer.dispose()
       scene.clear()
     }
-  }, [machineName, machineType, theme])
+  }, [machineName, machineType, theme, showParts, detectedParts])
 
   return (
-    <div 
-      ref={containerRef} 
-      className="w-full h-full"
-      style={{ 
-        minHeight: '500px',
-        cursor: 'grab',
-        background: 'transparent'
-      }}
-    />
+    <div className="relative w-full h-full">
+      <div 
+        ref={containerRef} 
+        className="w-full h-full"
+        style={{ 
+          minHeight: '500px',
+          cursor: 'grab',
+          background: 'transparent'
+        }}
+      />
+      
+      {isAnalyzing && scanProgress < 100 && (
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Animated scanner beam */}
+          <div 
+            className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent animate-pulse"
+            style={{
+              transform: `translateY(${(scanProgress / 100) * 100}%)`,
+              transition: 'transform 0.05s linear',
+              background: 'linear-gradient(to bottom, transparent 0%, rgba(59, 130, 246, 0.3) 20%, rgba(147, 51, 234, 0.3) 50%, rgba(236, 72, 153, 0.3) 80%, transparent 100%)',
+              height: '20%',
+            }}
+          />
+          
+          {/* Corner borders with AI colors */}
+          <div className="absolute inset-0 border-4 border-transparent">
+            <div className="absolute top-0 left-0 w-20 h-20 border-t-4 border-l-4 border-blue-500 animate-pulse" />
+            <div className="absolute top-0 right-0 w-20 h-20 border-t-4 border-r-4 border-purple-500 animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-20 h-20 border-b-4 border-l-4 border-purple-500 animate-pulse" />
+            <div className="absolute bottom-0 right-0 w-20 h-20 border-b-4 border-r-4 border-pink-500 animate-pulse" />
+          </div>
+          
+          {/* Progress text */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-6 py-3 rounded-full shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+              <span className="font-semibold">Analisando com IA... {Math.round(scanProgress)}%</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {showParts && detectedParts.length > 0 && (
+        <>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="absolute top-4 right-4 gap-2 shadow-lg z-20"
+            onClick={handleClearAnalysis}
+          >
+            <X className="h-4 w-4" />
+            Limpar Análise
+          </Button>
+          
+          <div className="absolute bottom-4 left-4 right-4 flex gap-3 overflow-x-auto pb-2">
+            {detectedParts.map((part) => (
+              <Card 
+                key={part.id}
+                className="flex-shrink-0 w-48 p-3 bg-background/95 backdrop-blur shadow-xl border-2"
+                style={{
+                  borderColor: part.status === "healthy" ? "rgb(34 197 94)" : part.status === "warning" ? "rgb(251 146 60)" : "rgb(239 68 68)"
+                }}
+              >
+                <div className="flex items-start gap-2">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                    style={{
+                      background: part.status === "healthy" ? "rgb(34 197 94)" : part.status === "warning" ? "rgb(251 146 60)" : "rgb(239 68 68)"
+                    }}
+                  >
+                    {part.marker}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{part.name}</p>
+                    <Badge 
+                      variant={part.status === "healthy" ? "default" : part.status === "warning" ? "secondary" : "destructive"}
+                      className="text-xs mt-1"
+                    >
+                      {part.status === "healthy" ? "Saudável" : part.status === "warning" ? "Atenção" : "Crítico"}
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   )
 }

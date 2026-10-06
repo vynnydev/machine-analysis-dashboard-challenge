@@ -10,8 +10,12 @@ interface User {
   username: string
   email: string
   name: string
+  role?: string
   location_id: string
   email_verified: boolean
+  avatar?: string
+  department?: string
+  phone?: string
 }
 
 interface AuthTokens {

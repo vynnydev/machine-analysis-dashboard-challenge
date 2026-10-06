@@ -180,8 +180,7 @@ function generateDefaultParts(machineType: string): PartData[] {
           manufacturer: "MedTech Solutions",
           status: baseStatus,
           statusText: baseStatus === "good" ? "Bom Estado" : "Atenção",
-          recommendation:
-            baseStatus === "good" ? "Calibrar anualmente" : "Recalibrar e verificar integridade",
+          recommendation: baseStatus === "good" ? "Calibrar anualmente" : "Recalibrar e verificar integridade",
           position: { x: 45, y: 65 },
           color: baseStatus === "good" ? "#3b82f6" : "#f59e0b",
           lastMaintenance: getRandomDate(60),
@@ -767,10 +766,35 @@ export interface LoginResponse {
 }
 
 const API_BASE_URL = "https://nm55w7i9ug.execute-api.us-east-1.amazonaws.com/prod"
+const MOCK_API_URL = "/api/mock"
+const USE_MOCK_API = true
 
 export async function registerUser(data: RegisterRequest): Promise<RegisterResponse> {
   try {
     console.log("[v0] Registering user:", { ...data, password: "***" })
+
+    if (USE_MOCK_API) {
+      const response = await fetch(`${MOCK_API_URL}/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          action: "register",
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.message || `Erro no registro: ${response.status}`
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      console.log("[v0] Mock registration successful:", result)
+      return result
+    }
 
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: "POST",
@@ -804,6 +828,34 @@ export async function loginUser(data: LoginRequest): Promise<LoginResponse> {
   try {
     console.log("[v0] Logging in user:", data.username)
 
+    if (USE_MOCK_API) {
+      const response = await fetch(`${MOCK_API_URL}/auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          action: "login",
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.message || `Erro no login: ${response.status}`
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      console.log("[v0] Mock login successful:", {
+        ...result,
+        access_token: "***",
+        id_token: "***",
+        refresh_token: "***",
+      })
+      return result
+    }
+
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       mode: "cors",
@@ -829,5 +881,138 @@ export async function loginUser(data: LoginRequest): Promise<LoginResponse> {
       throw new Error("Não foi possível conectar ao servidor. Verifique sua conexão ou se a API está disponível.")
     }
     throw error
+  }
+}
+
+export async function fetchMachinesFromMockAPI(): Promise<MachineData[]> {
+  try {
+    const response = await fetch("/api/mock/machines")
+    if (!response.ok) {
+      throw new Error("Failed to fetch machines from mock API")
+    }
+    const data = await response.json()
+    return data.machines || []
+  } catch (error) {
+    console.error("[v0] Error fetching from mock API, using fallback:", error)
+    return MOCK_MACHINES
+  }
+}
+
+export async function fetchLocationsFromMockAPI() {
+  try {
+    const response = await fetch("/api/mock/locations")
+    if (!response.ok) {
+      throw new Error("Failed to fetch locations from mock API")
+    }
+    const data = await response.json()
+    return data.locations || []
+  } catch (error) {
+    console.error("[v0] Error fetching locations from mock API:", error)
+    return []
+  }
+}
+
+export async function fetchEmployeesFromMockAPI() {
+  try {
+    const response = await fetch("/api/mock/employees")
+    if (!response.ok) {
+      throw new Error("Failed to fetch employees from mock API")
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error("[v0] Error fetching employees from mock API:", error)
+    return { employees: [], departments: [] }
+  }
+}
+
+export async function fetchTasksFromMockAPI() {
+  try {
+    const response = await fetch("/api/mock/tasks")
+    if (!response.ok) {
+      throw new Error("Failed to fetch tasks from mock API")
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error("[v0] Error fetching tasks from mock API:", error)
+    return { tasks: [], columns: [], automatedTasks: [] }
+  }
+}
+
+export async function fetchReportsFromMockAPI() {
+  try {
+    const response = await fetch("/api/mock/reports")
+    if (!response.ok) {
+      throw new Error("Failed to fetch reports from mock API")
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error("[v0] Error fetching reports from mock API:", error)
+    return { machineReports: [], metricsReports: [] }
+  }
+}
+
+export async function fetchTeamFromMockAPI() {
+  try {
+    const response = await fetch("/api/mock/team")
+    if (!response.ok) {
+      throw new Error("Failed to fetch team from mock API")
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error("[v0] Error fetching team from mock API:", error)
+    return { teamMembers: [], metrics: null }
+  }
+}
+
+export async function fetchVendorsFromMockAPI(partId?: string) {
+  try {
+    const url = partId ? `/api/mock/vendors?partId=${partId}` : "/api/mock/vendors"
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error("Failed to fetch vendors from mock API")
+    }
+    const data = await response.json()
+    return data.vendors || []
+  } catch (error) {
+    console.error("[v0] Error fetching vendors from mock API:", error)
+    return []
+  }
+}
+
+export async function fetchBedrockRenderConfig(facilityType?: string, analysisType?: string) {
+  try {
+    let url = "/api/mock/bedrock"
+    const params = new URLSearchParams()
+    if (facilityType) params.append("facilityType", facilityType)
+    if (analysisType) params.append("analysisType", analysisType)
+    if (params.toString()) url += `?${params.toString()}`
+
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error("Failed to fetch bedrock config from mock API")
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error("[v0] Error fetching bedrock config from mock API:", error)
+    return { renderConfig: null, facilityTypes: [], analysisPrompts: [] }
+  }
+}
+
+export async function fetchInventoryFromMockAPI() {
+  try {
+    const response = await fetch("/api/mock/inventory")
+    if (!response.ok) {
+      throw new Error("Failed to fetch inventory from mock API")
+    }
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error("[v0] Error fetching inventory from mock API:", error)
+    return { parts: [], categories: [], lowStockAlerts: [] }
   }
 }

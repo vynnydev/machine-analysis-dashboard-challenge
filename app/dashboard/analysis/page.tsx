@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Activity, Gauge, ThermometerSun, TrendingUp, AlertTriangle, CheckCircle2, Brain, Play, Pause, Wrench, Box, Cog, Zap, Shield, Clock, MapPin, Building2, Factory, ChevronLeft, ChevronRight, Sparkles, MapPinned, FileText } from 'lucide-react'
+import { Activity, Gauge, ThermometerSun, TrendingUp, AlertTriangle, CheckCircle2, Brain, Play, Pause, Wrench, Box, Cog, Zap, Shield, Clock, MapPin, Building2, Factory, ChevronLeft, ChevronRight, Sparkles, MapPinned, FileText, X } from 'lucide-react'
 import { useTheme } from "@/contexts/theme-context"
 import { fetchMachines, type MachineData } from "@/lib/api"
 import { Machine3DViewer } from "@/components/machine-3d-viewer"
@@ -411,6 +411,7 @@ function AnalysisPage() {
   const [machines, setMachines] = useState<MachineData[]>([])
   const [selectedMachine, setSelectedMachine] = useState<MachineData | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analyzedParts, setAnalyzedParts] = useState<any[]>([])
   const [selectedPart, setSelectedPart] = useState<any>(null)
   const [scrollPosition, setScrollPosition] = useState(0)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
@@ -421,20 +422,20 @@ function AnalysisPage() {
   const currentLocation = workshopLocations.find(loc => loc.id === selectedLocation)
   const currentMachines = currentLocation?.machines || []
 
-  useEffect(() => {
-    const loadMachines = async () => {
-      try {
-        const data = await fetchMachines()
-        setMachines(data)
-        if (currentMachines.length > 0) {
-          setSelectedMachine(currentMachines[0] as any)
-        }
-      } catch (error) {
-        console.error('Erro ao carregar máquinas:', error)
-      }
-    }
-    loadMachines()
-  }, [selectedLocation])
+  // useEffect(() => {
+  //   const loadMachines = async () => {
+  //     try {
+  //       const data = await fetchMachines()
+  //       setMachines(data)
+  //       if (currentMachines.length > 0) {
+  //         setSelectedMachine(currentMachines[0] as any)
+  //       }
+  //     } catch (error) {
+  //       console.error('Erro ao carregar máquinas:', error)
+  //     }
+  //   }
+  //   loadMachines()
+  // }, [selectedLocation])
 
   const currentMachineParts = selectedMachine ? machineParts[selectedMachine.name as keyof typeof machineParts] || [] : []
 
@@ -452,35 +453,32 @@ function AnalysisPage() {
     }
   }
 
+  const handleStartAnalysis = () => {
+    setIsAnalyzing(true)
+  }
+
+  const handleAnalysisComplete = (parts: any[]) => {
+    setIsAnalyzing(false)
+    setAnalyzedParts(parts)
+  }
+
+  const handleClearAnalysis = () => {
+    setIsAnalyzing(false)
+    setAnalyzedParts([])
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto p-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+            <h1 className="text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-600">
               Análise de Máquinas
             </h1>
             <p className="text-lg text-muted-foreground">
               Monitoramento inteligente e análise preditiva em tempo real
             </p>
           </div>
-          <Button 
-            size="lg"
-            onClick={() => setIsAnalyzing(!isAnalyzing)}
-            className="gap-2 shadow-lg"
-          >
-            {isAnalyzing ? (
-              <>
-                <Pause className="h-5 w-5" />
-                Pausar Análise
-              </>
-            ) : (
-              <>
-                <Play className="h-5 w-5" />
-                Iniciar Análise
-              </>
-            )}
-          </Button>
         </div>
 
         <Card className="shadow-lg border-2">
@@ -580,15 +578,40 @@ function AnalysisPage() {
                   <CardTitle className="flex items-center gap-2">
                     <Brain className="h-5 w-5 text-purple-600" />
                     Visualização 3D Interativa
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="ml-auto gap-2"
-                      onClick={() => setIsReportModalOpen(true)}
-                    >
-                      <FileText className="h-4 w-4" />
-                      Extrair Relatório
-                    </Button>
+                    <div className="ml-auto flex gap-2">
+                      {analyzedParts.length > 0 && !isAnalyzing && (
+                        <Button 
+                          variant="outline"
+                          size="sm" 
+                          className="gap-2 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950"
+                          onClick={handleClearAnalysis}
+                        >
+                          <X className="h-4 w-4 text-red-600" />
+                          <span className="text-red-600 dark:text-red-400">Limpar Análise</span>
+                        </Button>
+                      )}
+                      
+                      <Button 
+                        variant="default"
+                        size="sm" 
+                        className="gap-2 relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 border-0 shadow-lg"
+                        onClick={handleStartAnalysis}
+                        disabled={isAnalyzing}
+                      >
+                        <Brain className="h-4 w-4" />
+                        {isAnalyzing ? "Analisando..." : "Análise com IA"}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-2 border-2 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950"
+                        onClick={() => setIsReportModalOpen(true)}
+                      >
+                        <FileText className="h-4 w-4 text-purple-600" />
+                        <span className="text-purple-600 dark:text-purple-400">Extrair Relatório</span>
+                      </Button>
+                    </div>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">Use o mouse para rotacionar e a roda para zoom</p>
                 </CardHeader>
@@ -597,6 +620,8 @@ function AnalysisPage() {
                     <Machine3DViewer 
                       machineName={selectedMachine.name}
                       machineType={selectedMachine.type}
+                      isAnalyzing={isAnalyzing}
+                      onAnalysisComplete={handleAnalysisComplete}
                     />
                   </div>
                 </CardContent>
@@ -786,9 +811,19 @@ function AnalysisPage() {
                         </div>
                       ))}
                     </div>
-                    <Button className="w-full gap-2">
-                      <Box className="h-4 w-4" />
-                      Solicitar Peça
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full gap-2 relative overflow-hidden border-purple-200 dark:border-purple-800 group"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedPartForLocation(selectedPart)
+                        setIsLocationFinderOpen(true)
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <Sparkles className="h-4 w-4 text-purple-600 group-hover:text-white transition-colors duration-300 relative z-10" />
+                      <span className="text-sm font-medium text-purple-600 group-hover:text-white transition-colors duration-300 relative z-10">Verificar Preços com IA</span>
                     </Button>
                   </CardContent>
                 </Card>

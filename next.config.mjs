@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  turbopack: {},
   webpack: (config) => {
     // Configuração para Mapbox GL funcionar corretamente
     config.module.rules.push({
@@ -20,4 +21,4 @@ const nextConfig = {
   transpilePackages: ['mapbox-gl'],
 }
 
-module.exports = nextConfig
+export default nextConfig

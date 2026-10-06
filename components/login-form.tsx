@@ -11,21 +11,6 @@ import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-const demoAccounts = [
-  {
-    label: "Administrador",
-    username: "vynnydev",
-    password: "123456",
-    description: "Acesso completo à plataforma",
-  },
-  {
-    label: "Modo demonstração",
-    username: "demo",
-    password: "demo",
-    description: "Acesso de visitante para avaliação",
-  },
-]
-
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -35,11 +20,6 @@ export function LoginForm() {
     password: "",
   })
   const { login } = useAuth()
-
-  const handleDemoAccount = (username: string, password: string) => {
-    setFormData({ username, password })
-    setError("")
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,29 +52,6 @@ export function LoginForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
-      <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
-        <div className="mb-3">
-          <p className="text-sm font-semibold">Acessos para demonstração</p>
-          <p className="text-xs text-muted-foreground">Selecione um perfil para preencher o formulário automaticamente.</p>
-        </div>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {demoAccounts.map((account) => (
-            <Button
-              key={account.username}
-              type="button"
-              variant="outline"
-              onClick={() => handleDemoAccount(account.username, account.password)}
-              className="h-auto justify-start border-cyan-500/20 bg-background/70 px-3 py-2 text-left"
-            >
-              <span className="flex flex-col items-start gap-0.5">
-                <span className="text-sm font-medium">{account.label}</span>
-                <span className="text-xs text-muted-foreground">{account.username} · {account.description}</span>
-              </span>
-            </Button>
-          ))}
-        </div>
-      </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">

@@ -16,9 +16,10 @@
 - [Arquitetura de dados](#arquitetura-de-dados)
 - [Stack original do projeto Next](#stack-original-do-projeto-next)
 - [Screenshots](#screenshots)
-- [Texto para LinkedIn](#texto-para-linkedin)
 - [Deploy](#deploy)
 - [Licença](#licença)
+
+![Dashboard da plataforma](public/readme-dashboard.png)
 
 ## Visão geral
 
@@ -102,23 +103,9 @@ Sim. É um caso de uso de persistência poliglota: o **RDS PostgreSQL** é adequ
 
 ![Tela de login](public/readme-login.png)
 
-### Dashboard e monitoramento de máquinas
-
-![Dashboard](public/readme-dashboard.png)
-
 ### Análise de máquinas
 
 ![Análise de máquinas](public/readme-analysis.png)
-
-## Texto para LinkedIn
-
-> Hoje recebi as fotos da minha formatura e elas me fizeram lembrar de um projeto muito especial: a plataforma **Cognitiva Analytics**, desenvolvida para ser apresentada no festival de tecnologia **Next, da FIAP**.
->
-> Na época, tive a oportunidade de apresentar o projeto ao lado da **Anna, do Robélio e do Vitor**, e conquistamos o **2º lugar** com a nossa equipe. Por conta de outros imprevistos e do tempo, acabei compartilhando a plataforma no LinkedIn antes de publicar este registro.
->
-> A solução foi construída com **microfrontends**, AWS Amplify, AWS Lambda, Amazon MQ, AWS IoT Core, Amazon S3, Amazon Athena, Amazon QuickSight, Amazon Bedrock com Claude, Amazon DynamoDB e Amazon RDS for PostgreSQL. O objetivo era coletar e analisar dados de máquinas, combinando telemetria, mensageria, analytics e inteligência artificial para apoiar a manutenção preditiva.
->
-> Rever este projeto quase um ano depois reforça o quanto aprendi sobre arquitetura distribuída, cloud e trabalho em equipe. Obrigado, Anna, Robélio e Vitor, por fazerem parte dessa jornada.
 
 ## Deploy
 

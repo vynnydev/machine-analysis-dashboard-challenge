@@ -2,7 +2,7 @@
 
 import { useRef } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { OrbitControls, Environment, Text } from "@react-three/drei"
+import { OrbitControls } from "@react-three/drei"
 import type * as THREE from "three"
 
 function Forklift({ position = [0, 0, 0], rotation = 0, color = "#2563eb", moving = false }: any) {
@@ -274,32 +274,6 @@ function FactoryFloor({ corridors = 3, facilityType = "workshop" }: { corridors:
               <boxGeometry args={[6, 0.15, 24]} />
               <meshStandardMaterial color="#334155" metalness={0.3} roughness={0.7} />
             </mesh>
-
-            {/* Corridor number label - larger and more visible */}
-            <Text
-              position={[0, 0.2, -12]}
-              rotation={[-Math.PI / 2, 0, 0]}
-              fontSize={1.5}
-              color="#10b981"
-              anchorX="center"
-              anchorY="middle"
-              font="/fonts/Inter-Bold.ttf"
-            >
-              {i + 1}
-            </Text>
-
-            {/* End position label */}
-            <Text
-              position={[0, 0.2, 12]}
-              rotation={[-Math.PI / 2, 0, 0]}
-              fontSize={1.5}
-              color="#10b981"
-              anchorX="center"
-              anchorY="middle"
-              font="/fonts/Inter-Bold.ttf"
-            >
-              {i + 1}
-            </Text>
 
             {/* Aisle safety markers */}
             {[-10, -5, 0, 5, 10].map((z, idx) => (
@@ -597,7 +571,6 @@ export function WorkspaceViewer3D({
           )
         })}
 
-        <Environment preset="warehouse" />
       </Canvas>
     </div>
   )

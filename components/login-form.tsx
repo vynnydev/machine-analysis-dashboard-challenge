@@ -64,7 +64,7 @@ export function LoginForm() {
             value={formData.username}
             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
             required
-            className="h-12"
+            className="h-12 border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus-visible:ring-cyan-500"
           />
         </div>
 
@@ -78,12 +78,12 @@ export function LoginForm() {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
-              className="h-12 pr-10"
+              className="h-12 border-slate-300 bg-white pr-10 text-slate-900 placeholder:text-slate-500 focus-visible:ring-cyan-500"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors hover:text-slate-900"
               aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

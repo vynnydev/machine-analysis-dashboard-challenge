@@ -193,7 +193,7 @@ export default function LoginPage() {
         <div className="relative z-10 text-blue-100 text-sm">Cognitiva Analytics - Análise Preditiva v3.0</div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center bg-white p-8">
+      <div className="flex min-h-screen flex-1 items-center justify-center bg-white p-4 sm:p-8">
         <div className="w-full max-w-md">
           <LoginForm />
         </div>

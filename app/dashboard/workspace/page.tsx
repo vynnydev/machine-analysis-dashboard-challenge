@@ -345,12 +345,12 @@ export default function WorkspacePage() {
   }, [])
 
   return (
-    <div className="fixed inset-0 top-16 bg-background overflow-hidden">
+    <div className="fixed inset-0 top-16 overflow-hidden bg-background">
       {/* Top Bar */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-background/95 backdrop-blur-sm border-b border-border z-20 flex items-center justify-between px-6 pl-24">
-        <div className="flex items-center gap-4">
+      <div className="absolute inset-x-0 top-0 z-20 flex min-h-16 flex-col items-start justify-center gap-2 overflow-x-auto border-b border-border bg-background/95 px-3 py-2 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:pl-24">
+        <div className="flex min-w-max items-center gap-2 sm:gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Monitor de Máquinas</h1>
+            <h1 className="text-xl font-bold text-foreground sm:text-2xl">Monitor de Máquinas</h1>
             <p className="text-sm text-muted-foreground">{facility?.name || "Configure seu ambiente de trabalho"}</p>
           </div>
           <select
@@ -412,11 +412,11 @@ export default function WorkspacePage() {
       </div>
 
       {/* Main Content */}
-      <div className="absolute top-16 left-0 right-0 bottom-0">
+      <div className="absolute inset-x-0 bottom-0 top-24 sm:top-16">
         {/* Left Panel */}
         <Card
-          className={`absolute left-24 top-6 bg-card/95 backdrop-blur-sm border-border transition-all duration-300 z-10 rounded-2xl ${
-            leftPanelState === "minimized" ? "w-16 h-16" : "w-72"
+          className={`absolute left-3 top-3 z-10 rounded-2xl border-border bg-card/95 backdrop-blur-sm transition-all duration-300 lg:left-24 lg:top-6 ${
+            leftPanelState === "minimized" ? "h-16 w-16" : "w-[calc(100vw-1.5rem)] max-w-72"
           }`}
         >
           <div className="px-5">

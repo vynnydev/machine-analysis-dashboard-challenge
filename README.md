@@ -14,8 +14,12 @@
 - [Acesso de demonstração](#acesso-de-demonstração)
 - [Executando localmente](#executando-localmente)
 - [Arquitetura de dados](#arquitetura-de-dados)
+- [Stack original do projeto Next](#stack-original-do-projeto-next)
+- [Screenshots](#screenshots)
 - [Deploy](#deploy)
 - [Licença](#licença)
+
+![Dashboard da plataforma](public/readme-dashboard.png)
 
 ## Visão geral
 
@@ -74,6 +78,34 @@ pnpm build
 A aplicação não depende de banco de dados nesta versão. Os dados de negócio são fornecidos por arquivos mock e rotas em `app/api/mock`. A sessão do usuário autenticado é mantida temporariamente no navegador por meio de `localStorage`, permitindo navegar pelo dashboard durante a demonstração.
 
 Para uma versão de produção, substitua a camada mock por uma API protegida e implemente autenticação, persistência, autorização por papel e armazenamento seguro de sessão.
+
+## Stack original do projeto Next
+
+Na apresentação original do projeto desenvolvido para o festival de tecnologia **Next, da FIAP**, a solução foi concebida com uma arquitetura distribuída baseada em:
+
+- Microfrontends e deploy na AWS Amplify.
+- AWS Lambda para microserviços.
+- Amazon MQ para mensageria entre serviços.
+- Amazon S3 para armazenamento dos arquivos coletados das máquinas.
+- Amazon Athena e Amazon QuickSight para consultas e análises.
+- Amazon Bedrock com Claude para análises inteligentes dos arquivos.
+- AWS IoT Core para ingestão e comunicação com os equipamentos.
+- Amazon DynamoDB para telemetria, eventos e dados de alta escala.
+- Amazon RDS for PostgreSQL para dados relacionais, configurações, usuários e histórico operacional.
+
+### RDS PostgreSQL e DynamoDB fazem sentido juntos?
+
+Sim. É um caso de uso de persistência poliglota: o **RDS PostgreSQL** é adequado para dados relacionais e transacionais, enquanto o **DynamoDB** funciona melhor para telemetria, eventos e leituras de baixa latência em grande volume. A recomendação é definir claramente a fonte de verdade de cada domínio e evitar duplicar o mesmo dado nos dois bancos sem uma estratégia de sincronização.
+
+## Screenshots
+
+### Login
+
+![Tela de login](public/readme-login.png)
+
+### Análise de máquinas
+
+![Análise de máquinas](public/readme-analysis.png)
 
 ## Deploy
 

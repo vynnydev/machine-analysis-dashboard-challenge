@@ -14,6 +14,9 @@
 - [Acesso de demonstração](#acesso-de-demonstração)
 - [Executando localmente](#executando-localmente)
 - [Arquitetura de dados](#arquitetura-de-dados)
+- [Stack original do projeto Next](#stack-original-do-projeto-next)
+- [Screenshots](#screenshots)
+- [Texto para LinkedIn](#texto-para-linkedin)
 - [Deploy](#deploy)
 - [Licença](#licença)
 
@@ -74,6 +77,48 @@ pnpm build
 A aplicação não depende de banco de dados nesta versão. Os dados de negócio são fornecidos por arquivos mock e rotas em `app/api/mock`. A sessão do usuário autenticado é mantida temporariamente no navegador por meio de `localStorage`, permitindo navegar pelo dashboard durante a demonstração.
 
 Para uma versão de produção, substitua a camada mock por uma API protegida e implemente autenticação, persistência, autorização por papel e armazenamento seguro de sessão.
+
+## Stack original do projeto Next
+
+Na apresentação original do projeto desenvolvido para o festival de tecnologia **Next, da FIAP**, a solução foi concebida com uma arquitetura distribuída baseada em:
+
+- Microfrontends e deploy na AWS Amplify.
+- AWS Lambda para microserviços.
+- Amazon MQ para mensageria entre serviços.
+- Amazon S3 para armazenamento dos arquivos coletados das máquinas.
+- Amazon Athena e Amazon QuickSight para consultas e análises.
+- Amazon Bedrock com Claude para análises inteligentes dos arquivos.
+- AWS IoT Core para ingestão e comunicação com os equipamentos.
+- Amazon DynamoDB para telemetria, eventos e dados de alta escala.
+- Amazon RDS for PostgreSQL para dados relacionais, configurações, usuários e histórico operacional.
+
+### RDS PostgreSQL e DynamoDB fazem sentido juntos?
+
+Sim. É um caso de uso de persistência poliglota: o **RDS PostgreSQL** é adequado para dados relacionais e transacionais, enquanto o **DynamoDB** funciona melhor para telemetria, eventos e leituras de baixa latência em grande volume. A recomendação é definir claramente a fonte de verdade de cada domínio e evitar duplicar o mesmo dado nos dois bancos sem uma estratégia de sincronização.
+
+## Screenshots
+
+### Login
+
+![Tela de login](public/readme-login.png)
+
+### Dashboard e monitoramento de máquinas
+
+![Dashboard](public/readme-dashboard.png)
+
+### Análise de máquinas
+
+![Análise de máquinas](public/readme-analysis.png)
+
+## Texto para LinkedIn
+
+> Hoje recebi as fotos da minha formatura e elas me fizeram lembrar de um projeto muito especial: a plataforma **Cognitiva Analytics**, desenvolvida para ser apresentada no festival de tecnologia **Next, da FIAP**.
+>
+> Na época, tive a oportunidade de apresentar o projeto ao lado da **Anna, do Robélio e do Vitor**, e conquistamos o **2º lugar** com a nossa equipe. Por conta de outros imprevistos e do tempo, acabei compartilhando a plataforma no LinkedIn antes de publicar este registro.
+>
+> A solução foi construída com **microfrontends**, AWS Amplify, AWS Lambda, Amazon MQ, AWS IoT Core, Amazon S3, Amazon Athena, Amazon QuickSight, Amazon Bedrock com Claude, Amazon DynamoDB e Amazon RDS for PostgreSQL. O objetivo era coletar e analisar dados de máquinas, combinando telemetria, mensageria, analytics e inteligência artificial para apoiar a manutenção preditiva.
+>
+> Rever este projeto quase um ano depois reforça o quanto aprendi sobre arquitetura distribuída, cloud e trabalho em equipe. Obrigado, Anna, Robélio e Vitor, por fazerem parte dessa jornada.
 
 ## Deploy
 

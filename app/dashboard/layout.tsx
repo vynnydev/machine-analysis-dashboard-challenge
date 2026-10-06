@@ -42,7 +42,7 @@ export default function DashboardLayout({
   }, [])
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen w-full overflow-x-hidden bg-background flex">
       <Suspense fallback={null}>
         {/* Mobile overlay */}
         {sidebarOpen && (
@@ -54,7 +54,7 @@ export default function DashboardLayout({
         <div className="flex-1 flex flex-col min-h-screen">
           {/* Header */}
           <header className="bg-card border-b border-border sticky top-0 z-30">
-            <div className="flex items-center justify-between p-4 gap-4">
+            <div className="flex items-center justify-between gap-2 p-3 sm:gap-4 sm:p-4">
               <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
                   <Menu className="h-5 w-5" />
@@ -68,8 +68,8 @@ export default function DashboardLayout({
                   className="gap-2 bg-muted/50 hover:bg-blue-600/10 hover:border-blue-500/50 w-full max-w-xl justify-start text-muted-foreground transition-colors"
                 >
                   <Search className="h-4 w-4" />
-                  <span className="text-sm">Buscar funcionalidades...</span>
-                  <kbd className="ml-auto px-2 py-0.5 bg-background border border-border rounded text-xs">⌘K</kbd>
+                  <span className="truncate text-sm">Buscar funcionalidades...</span>
+                  <kbd className="ml-auto hidden shrink-0 rounded border border-border bg-background px-2 py-0.5 text-xs sm:inline-block">⌘K</kbd>
                 </Button>
               </div>
 
@@ -107,7 +107,7 @@ export default function DashboardLayout({
           </header>
 
           {/* Main content */}
-          <main className="flex-1 p-6 overflow-auto">{children}</main>
+          <main className="min-w-0 flex-1 overflow-auto p-3 sm:p-6">{children}</main>
         </div>
 
         {/* Modals */}

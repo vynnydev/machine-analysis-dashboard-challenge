@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       localStorage.setItem("auth_tokens", JSON.stringify(tokens))
 
-      router.push("/dashboard/workspace")
+      router.push("/dashboard")
     } catch (error) {
       console.error("[v0] Login failed:", error)
       throw error

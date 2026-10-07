@@ -19,7 +19,7 @@
 - [Deploy](#deploy)
 - [Licença](#licença)
 
-![Dashboard da plataforma](public/readme-dashboard.png)
+![Dashboard 3D da plataforma](public/readme-dashboard-3d.png)
 
 ## Visão geral
 
